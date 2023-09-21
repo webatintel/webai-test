@@ -1,0 +1,30 @@
+[
+  {
+    "model": "candy-8",
+    "ep": ["wasm", "webgpu"]
+  },
+  {
+    "model": "densenet-9",
+    "ep": ["wasm", "webgpu"]
+  },
+  {
+    "model": "efficientnet-lite4-11",
+    "ep": ["wasm", "webgpu"]
+  },
+  {
+    "model": "emotion-ferplus-8",
+    "ep": ["wasm", "webgpu"]
+  },
+  {
+    "model": "mobilenetv2-12",
+    "ep": ["wasm", "webgpu"]
+  },
+  {
+    "model": "resnet50-v2-7",
+    "ep": ["wasm", "webgpu"]
+  },
+  {
+    "model": "tinyyolov2-8",
+    "ep": ["wasm", "webgpu"]
+  }
+]

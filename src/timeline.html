@@ -1,0 +1,177 @@
+<head>
+  <script type='text/javascript' src='https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js'
+    crossOrigin></script>
+  <script type='text/javascript' src='../util/base.js'></script>
+  <link href='https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css' rel='stylesheet'
+    type='text/css' crossOrigin />
+</head>
+
+<body>
+  <text>
+    <b>Advanced usage</b>
+    <p>
+      Some parameters are supported in url, and you may use them as 'index.html?key0=value0&key1=value1'. Supported
+      parameters are:
+    <p>
+      1) file=[json file name]: file to be displayed. Example: file=20220531/mobilenet_v3----webgpu
+    <p>
+      2) index=[num]: index to be displayed, starting from 0. Default is the last one.
+    <p>
+  </text>
+  <div id='table'></div>
+  <p></p>
+  <div id='timeline'></div>
+  <script type='text/javascript'>
+    'use strict';
+
+    readFile(`../out/${getParamByName('file')}.json`, function (dataText) {
+      let jsonData = JSON.parse(dataText);
+      let index = getParamByName('index') || jsonData.length - 1;
+      genTable(jsonData, index);
+      genTimeline(jsonData, index);
+    });
+
+    function genTable(jsonData, index) {
+      let length = jsonData.length;
+      const highlightStyle = 'background-color:yellow';
+      const commonStyle = 'background-color:white';
+      let table = document.createElement('table');
+      table.align = 'center';
+      table.setAttribute('border', '1');
+      document.getElementById('table').appendChild(table);
+      let rowIndex = 0;
+      let row, td;
+
+      // title
+      row = table.insertRow(rowIndex++);
+      row.style.fontWeight = 'bold';
+      td = row.insertCell(0);
+      td.innerHTML = 'Index';
+      for (let i = 0; i < length; i++) {
+        let td = row.insertCell(i + 1);
+        td.innerHTML = i;
+        td.style = i === index ? highlightStyle : commonStyle;
+      }
+
+      // total
+      row = table.insertRow(rowIndex++);
+      td = row.insertCell(0);
+      td.innerHTML = 'Total (ms)';
+      for (let i = 0; i < length; i++) {
+        let td = row.insertCell(i + 1);
+        let cpuTfjsLength = jsonData[i]['CPU-TFJS'].length;
+        td.innerHTML = (jsonData[i]['CPU-TFJS'][cpuTfjsLength - 1][1] - jsonData[i]['CPU-TFJS'][0][1]).toFixed(2);
+        td.style = i === index ? highlightStyle : commonStyle;
+      }
+
+      // ops
+      row = table.insertRow(rowIndex++);
+      td = row.insertCell(0);
+      td.innerHTML = 'Ops (ms)';
+      for (let i = 0; i < length; i++) {
+        let td = row.insertCell(i + 1);
+        let gpuLength = jsonData[i]['GPU'].length;
+        let sum = 0;
+        for (let j = 0; j < gpuLength; j++) {
+          sum += jsonData[i]['GPU'][j][2] - jsonData[i]['GPU'][j][1];
+        }
+        td.innerHTML = sum.toFixed(2);
+        td.style = i === index ? highlightStyle : commonStyle;
+      }
+    }
+
+    function genTimeline(jsonData, index) {
+      let groupsDataSet = [];
+      let itemsDataSet = [];
+      let globalItemIndex = 0;
+      let groups = Object.keys(jsonData[index]);
+
+      groups.forEach(function (group, groupIndex) {
+        let groupData = jsonData[index][group];
+        groupsDataSet.push({ id: groupIndex, content: `[${groupIndex}]${group}`, value: groupIndex });
+        for (let itemIndex = 0; itemIndex < groupData.length; itemIndex++) {
+          let startTimeStr = groupData[itemIndex][1];
+          let startTime = strToTime(startTimeStr);
+          let content = '';
+          let title;
+
+          let itemDataSet = { id: globalItemIndex, group: groupIndex, start: startTime };
+          if (groupData[itemIndex].length === 2) {
+            itemDataSet['type'] = 'point';
+            title = `${startTimeStr}: ${groupData[itemIndex][0]}`;
+          } else {
+            let endTimeStr = groupData[itemIndex][2];
+            itemDataSet['end'] = strToTime(endTimeStr);
+            title = `${startTimeStr} - ${endTimeStr}: ${groupData[itemIndex][0]}`;
+          }
+
+          if (group === 'GPU') {
+            content = `${itemIndex}`;
+            title = `[${itemIndex}] ${title}`;
+          }
+          itemDataSet['content'] = content;
+          itemDataSet['title'] = title;
+
+          itemsDataSet.push(itemDataSet);
+          globalItemIndex++;
+        }
+      });
+
+      let visGroups = new vis.DataSet(groupsDataSet);
+      let visItems = new vis.DataSet(itemsDataSet);
+      let container = document.getElementById('timeline');
+      let cpuTfjsLength = jsonData[index]['CPU-TFJS'].length;
+      let options = {
+        groupOrder: function (a, b) {
+          return a.id - b.id;
+        },
+        order: function (a, b) {
+          return b.id - a.id;
+        },
+        start: strToTime(jsonData[index]['CPU-TFJS'][0][1] - 1),
+        end: strToTime(jsonData[index]['CPU-TFJS'][cpuTfjsLength - 1][1] + 1),
+        locale: 'en',
+        editable: false,
+        showTooltips: true,
+        tooltip: {
+          followMouse: true,
+          overflowMethod: 'cap',
+        }
+      };
+
+      let timeline = new vis.Timeline(container);
+      timeline.setOptions(options);
+      timeline.setGroups(visGroups);
+      timeline.setItems(visItems);
+    }
+
+    function getParamByName(name, url) {
+      if (!url)
+        url = window.location.href;
+      name = name.replace(/[\[\]]/g, '\\$&');
+      let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)', 'i');
+      let match = regex.exec(url);
+      if (!match)
+        return null;
+      if (!match[2])
+        return '';
+      return decodeURIComponent(match[2].replace(/\+/g, ' '));
+    }
+
+    function readFile(file, callback) {
+      let xhr = new XMLHttpRequest();
+      xhr.overrideMimeType('application/json');
+      xhr.open('GET', file, true);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === '200') {
+          callback(xhr.responseText);
+        }
+      };
+      xhr.send();
+    }
+
+    function strToTime(str) {
+      return new Date(str * 100);
+    }
+  </script>
+</body>
