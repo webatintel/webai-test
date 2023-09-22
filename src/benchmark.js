@@ -83,14 +83,14 @@ async function closeContext(context) {
   }
 }
 
-async function runBenchmark(target) {
+async function runBenchmark(task) {
   // get benchmarks
   let benchmarks = [];
   let benchmarkJson =
     path.join(path.resolve(__dirname), util.args['benchmark-json']);
-  let targetConfigs = JSON.parse(fs.readFileSync(benchmarkJson));
+  let taskConfigs = JSON.parse(fs.readFileSync(benchmarkJson));
 
-  for (let config of targetConfigs) {
+  for (let config of taskConfigs) {
     if ('model' in util.args) {
       config['model'] =
         intersect(config['model'], util.args['model'].split(','));
@@ -99,19 +99,19 @@ async function runBenchmark(target) {
       continue;
     }
 
-    if (target === 'conformance') {
+    if (task === 'conformance') {
       if ('conformance-ep' in util.args) {
         config['ep'] = util.args['conformance-ep'].split(',');
       } else {
         // eps in json file are ignored for conformance
-        config['ep'] = ['webgpu', 'wasm'];
+        config['ep'] = ['webgpu'];
       }
       for (let ep of config['ep']) {
         if (util.conformanceEps.indexOf(ep) < 0) {
           util.conformanceEps.push(ep);
         }
       }
-    } else if (target === 'performance') {
+    } else if (task === 'performance') {
       if ('performance-ep' in util.args) {
         config['ep'] = util.args['performance-ep'].split(',');
       } else if (!('ep' in config)) {
@@ -141,14 +141,14 @@ async function runBenchmark(target) {
   let results = [];
   let defaultValue = 'NA';
   let epsLength = util.allEps.length;
-  let metrics = util.targetMetrics[target];
-  if (target === 'performance' && util.runTimes === 0) {
+  let metrics = util.taskMetrics[task];
+  if (task === 'performance' && util.runTimes === 0) {
     metrics.length = 1;
   }
   let metricsLength = metrics.length;
   // for errorMsg
   let resultMetricsLength = metricsLength;
-  if (target === 'conformance') {
+  if (task === 'conformance') {
     resultMetricsLength += 1;
   }
   let context;
@@ -156,13 +156,6 @@ async function runBenchmark(target) {
 
   if (!('new-context' in util.args)) {
     [context, page] = await startContext();
-  }
-
-  let task = '';
-  if (target === 'conformance') {
-    task = 'correctness';
-  } else if (target === 'performance') {
-    task = 'performance';
   }
 
   for (let i = 0; i < benchmarksLength; i++) {
@@ -185,7 +178,7 @@ async function runBenchmark(target) {
     if (modelName != previousModelName) {
       let placeholder = [modelName].concat(
         Array(epsLength * resultMetricsLength).fill(defaultValue));
-      if (target === 'performance' && util.breakdown) {
+      if (task === 'performance' && util.breakdown) {
         placeholder = placeholder.concat({});
       }
       results.push(placeholder);
@@ -196,9 +189,9 @@ async function runBenchmark(target) {
     if (util.dryrun) {
       let metricIndex = 0;
       while (metricIndex < metricsLength) {
-        if (target === 'conformance') {
+        if (task === 'conformance') {
           result[epIndex * resultMetricsLength + metricIndex + 1] = 'true';
-        } else if (target === 'performance') {
+        } else if (task === 'performance') {
           let tmpIndex = epIndex * resultMetricsLength + metricIndex;
           result[tmpIndex + 1] = tmpIndex + 1;
           let op_time = result[epsLength * resultMetricsLength + 1];
@@ -222,8 +215,25 @@ async function runBenchmark(target) {
         }
       }
       url += `&${util.toolkitUrlArgs}`;
-      console.log(url);
+      if (task === 'performance') {
+        let warmupTimes;
+        if ('warmup-times' in util.args) {
+          warmupTimes = parseInt(util.args['warmup-times']);
+        } else {
+          warmupTimes = 10;
+        }
+        util.warmupTimes = warmupTimes;
 
+        let runTimes;
+        if ('run-times' in util.args) {
+          runTimes = parseInt(util.args['run-times']);
+        } else {
+          runTimes = 10;
+        }
+        util.runTimes = runTimes;
+        url += `&warmupTimes=${warmupTimes}&runTimes=${runTimes}`;
+      }
+      console.log(url);
       await page.goto(url);
 
       try {
@@ -232,7 +242,7 @@ async function runBenchmark(target) {
       }
 
       // handle errorMsg
-      if (target === 'conformance') {
+      if (task === 'conformance') {
         results[results.length - 1][(epIndex + 1) * resultMetricsLength] =
           errorMsg;
       }
@@ -249,7 +259,7 @@ async function runBenchmark(target) {
 
       // quit with error
       if (util.hasError) {
-        if (target === 'conformance') {
+        if (task === 'conformance') {
           results[results.length - 1][epIndex * resultMetricsLength + 1] =
             'false';
         }
@@ -262,13 +272,12 @@ async function runBenchmark(target) {
       let testResult = await page.$eval('#result', el => el.textContent);
       let testResults = JSON.parse(testResult);
       while (metricIndex < metricsLength) {
-        console.log(results[results.length - 1]);
-        results[results.length - 1][epIndex * resultMetricsLength + metricIndex + 1] = testResults[util.targetMetrics[target][metricIndex]];
+        results[results.length - 1][epIndex * resultMetricsLength + metricIndex + 1] = testResults[util.taskMetrics[task][metricIndex]];
         metricIndex += 1;
       }
 
       // get breakdown data
-      if (target === 'performance' && util.breakdown) {
+      if (task === 'performance' && util.breakdown) {
         try {
           await page.waitForSelector(
             '#kernels > tbody > tr:nth-child(1)', { timeout: util.timeout });
@@ -310,7 +319,7 @@ async function runBenchmark(target) {
     await closeContext(context);
   }
 
-  if (target === 'performance') {
+  if (task === 'performance') {
     let fileName = `${util.timestamp.substring(0, 8)}.json`;
     let file = path.join(util.timestampDir, fileName);
     fs.writeFileSync(file, JSON.stringify(results));
