@@ -305,7 +305,7 @@ async function main() {
     util.breakdown = false;
   }
 
-  util.toolkitUrlArgs += `ortUrl=https://wp-27.sh.intel.com/workspace/project/onnxruntime`;
+  util.toolkitUrlArgs += `ortUrl=https://wp-27.sh.intel.com/workspace/project/onnxruntime&modelLocation=local`;
 
   if ('toolkit-url-args' in util.args) {
     util.toolkitUrlArgs += `&${util.args['toolkit-url-args']}`;
