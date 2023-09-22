@@ -98,10 +98,10 @@ util.args =
       type: 'boolean',
       describe: 'skip config',
     })
-    .option('target', {
+    .option('tasks', {
       type: 'string',
       describe:
-        'test target, split by comma, can be conformance, performance, unit, trace, upload and so on.',
+        'test tasks, split by comma, can be conformance, performance, unit, trace, upload and so on.',
       default: 'conformance,performance',
     })
     .option('ort-dir', {
@@ -148,32 +148,32 @@ util.args =
     .example([
       ['node $0 --email a@intel.com;b@intel.com // Send report to emails'],
       [
-        'node $0 --target performance --toolkit-url http://127.0.0.1/workspace/project/tfjswebgpu/tfjs'
+        'node $0 --tasks performance --toolkit-url http://127.0.0.1/workspace/project/tfjswebgpu/tfjs'
       ],
       [
-        'node $0 --target performance --model pose-detection --architecture BlazePose-heavy --input-size 256 --input-type tensor --performance-ep webgpu'
+        'node $0 --tasks performance --model pose-detection --architecture BlazePose-heavy --input-size 256 --input-type tensor --performance-ep webgpu'
       ],
       [
         'node $0 --browser-args="--enable-dawn-features=disable_workgroup_init --no-sandbox --enable-zero-copy"'
       ],
       [
-        'node $0 --target performance --model mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --server-info --new-context'
+        'node $0 --tasks performance --model mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --server-info --new-context'
       ],
       [
-        'node $0 --target performance --model mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --timestamp day'
+        'node $0 --tasks performance --model mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --timestamp day'
       ],
       [
-        'node $0 --target performance --model mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 3 --timestamp day --trace'
+        'node $0 --tasks performance --model mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 3 --timestamp day --trace'
       ],
-      ['node $0 --target trace --trace-timestamp 20220601'],
-      ['node $0 --target unit --unit-filter=add --unit-skip-build'],
+      ['node $0 --tasks trace --trace-timestamp 20220601'],
+      ['node $0 --tasks unit --unit-filter=add --unit-skip-build'],
       [
-        'node $0 --target conformance --conformance-ep webgpu --model mobilenetv2-12 --timestamp day --skip-config // single test'
+        'node $0 --tasks conformance --conformance-ep webgpu --model mobilenetv2-12 --timestamp day --skip-config // single test'
       ],
       [
-        'node $0 --target performance --performance-ep webgpu --model mobilenetv2-12 --timestamp day --skip-config // single test'
+        'node $0 --tasks performance --performance-ep webgpu --model mobilenetv2-12 --timestamp day --skip-config // single test'
       ],
-      ['node $0 --target unit --unit-ep webgpu --timestamp day'],
+      ['node $0 --tasks unit --unit-ep webgpu --timestamp day'],
     ])
     .help()
     .wrap(180)
@@ -301,27 +301,11 @@ async function main() {
       ' --enable-dawn-features=record_detailed_timing_in_trace_events,disable_timestamp_query_conversion --trace-startup-format=json --enable-tracing=disabled-by-default-gpu.dawn'
   }
 
-  let warmupTimes;
-  if ('warmup-times' in util.args) {
-    warmupTimes = parseInt(util.args['warmup-times']);
-  } else {
-    warmupTimes = 10;
-  }
-  util.warmupTimes = warmupTimes;
-
-  let runTimes;
-  if ('run-times' in util.args) {
-    runTimes = parseInt(util.args['run-times']);
-  } else {
-    runTimes = 10;
-  }
-  util.runTimes = runTimes;
-
   if ('disable-breakdown' in util.args) {
     util.breakdown = false;
   }
 
-  util.toolkitUrlArgs += `ortUrl=https://wp-27.sh.intel.com/workspace/project/onnxruntime&warmupTimes=${warmupTimes}&runTimes=${runTimes}`;
+  util.toolkitUrlArgs += `ortUrl=https://wp-27.sh.intel.com/workspace/project/onnxruntime`;
 
   if ('toolkit-url-args' in util.args) {
     util.toolkitUrlArgs += `&${util.args['toolkit-url-args']}`;
@@ -337,7 +321,7 @@ async function main() {
     util.toolkitUrl = util.args['toolkit-url'];
   }
 
-  let targets = util.args['target'].split(',');
+  let tasks = util.args['tasks'].split(',');
 
   if (!fs.existsSync(util.outDir)) {
     fs.mkdirSync(util.outDir, { recursive: true });
@@ -377,20 +361,20 @@ async function main() {
       util.log(`== Test round ${i + 1}/${util.args['repeat']} ==`);
     }
 
-    for (let target of targets) {
+    for (let task of tasks) {
       startTime = new Date();
-      util.log(`=${target}=`);
-      if (['conformance', 'performance'].indexOf(target) >= 0) {
-        if (!(target === 'performance' && util.warmupTimes === 0 &&
+      util.log(`=${task}=`);
+      if (['conformance', 'performance'].indexOf(task) >= 0) {
+        if (!(task === 'performance' && util.warmupTimes === 0 &&
           util.runTimes === 0)) {
-          results[target] = await runBenchmark(target);
+          results[task] = await runBenchmark(task);
         }
-      } else if (target === 'unit') {
-        results[target] = await runUnit();
-      } else if (target === 'trace') {
+      } else if (task === 'unit') {
+        results[task] = await runUnit();
+      } else if (task === 'trace') {
         await parseTrace();
       }
-      util.duration += `${target}: ${(new Date() - startTime) / 1000} `;
+      util.duration += `${task}: ${(new Date() - startTime) / 1000} `;
     }
 
     if (!('trace-timestamp' in util.args)) {

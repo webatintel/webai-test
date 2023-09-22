@@ -54,19 +54,19 @@ async function report(results) {
 
   // main performance and conformance tables
   let benchmarkTables = '';
-  for (let target of ['performance', 'conformance']) {
-    if (!(target in results)) {
+  for (let task of ['performance', 'conformance']) {
+    if (!(task in results)) {
       continue;
     }
-    let targetResults = results[target];
-    let metrics = util.targetMetrics[target];
+    let taskResults = results[task];
+    let metrics = util.taskMetrics[task];
     let metricsLength = metrics.length;
     // for errorMsg
-    if (target === 'conformance') {
+    if (task === 'conformance') {
       metricsLength += 1;
     }
     let unit;
-    if (target === 'performance') {
+    if (task === 'performance') {
       unit = ' (ms)';
     } else {
       unit = '';
@@ -77,13 +77,13 @@ async function report(results) {
       let benchmarkTable = `<table>`;
 
       // header
-      benchmarkTable += `<tr><th>${target} (${metric})</th>`;
+      benchmarkTable += `<tr><th>${task} (${metric})</th>`;
       for (let epIndex = 0; epIndex < epsLength;
         epIndex++) {
         let ep = util.allEps[epIndex];
-        if ((target === 'conformance' &&
+        if ((task === 'conformance' &&
           util.conformanceEps.indexOf(ep) < 0) ||
-          (target === 'performance' &&
+          (task === 'performance' &&
             util.performanceEps.indexOf(ep) < 0)) {
           continue;
         }
@@ -95,12 +95,12 @@ async function report(results) {
           }
         } else {
           benchmarkTable += `<th>${ep}${unit}</th>`;
-          if (target === 'conformance') {
+          if (task === 'conformance') {
             benchmarkTable += `<th>${ep} error</th>`;
           }
         }
 
-        if (target === 'performance' && ep !== 'webgpu') {
+        if (task === 'performance' && ep !== 'webgpu') {
           if (metric === 'Subsequent average') {
             benchmarkTable += `<th>webgpu total vs ${ep} total (%)</th>`
             if (util.breakdown) {
@@ -114,9 +114,9 @@ async function report(results) {
       benchmarkTable += '</tr>';
 
       // body
-      for (let resultIndex = 0; resultIndex < targetResults.length;
+      for (let resultIndex = 0; resultIndex < taskResults.length;
         resultIndex++) {
-        let result = targetResults[resultIndex];
+        let result = taskResults[resultIndex];
         let opsResult = result[result.length - 1];
         benchmarkTable += `<tr><td>${result[0]}</td>`;
 
@@ -125,9 +125,9 @@ async function report(results) {
         for (let epIndex = 0; epIndex < epsLength;
           epIndex++) {
           let ep = util.allEps[epIndex];
-          if ((target === 'conformance' &&
+          if ((task === 'conformance' &&
             util.conformanceEps.indexOf(ep) < 0) ||
-            (target === 'performance' &&
+            (task === 'performance' &&
               util.performanceEps.indexOf(ep) < 0)) {
             continue;
           }
@@ -144,7 +144,7 @@ async function report(results) {
             webgpuOpsValue = epOpsValue;
           }
           let style = neutralStyle;
-          if (target === 'conformance') {
+          if (task === 'conformance') {
             if (epTotalValue === 'false') {
               style = badStyle;
             } else if (epTotalValue === 'true') {
@@ -152,13 +152,13 @@ async function report(results) {
             }
           }
           benchmarkTable += `<td ${style}>${epTotalValue}</td>`;
-          if (target === 'conformance') {
+          if (task === 'conformance') {
             benchmarkTable += `<td>${result[epIndex * metricsLength + metricIndex + 2]}</td>`;
           }
           if (metric === 'Subsequent average' && util.breakdown) {
             benchmarkTable += `<td>${epOpsValue}</td>`
           }
-          if (target === 'performance' && ep !== 'webgpu') {
+          if (task === 'performance' && ep !== 'webgpu') {
             let totalPercent = 'NA';
             let totalStyle = neutralStyle;
             if (epTotalValue !== 'NA' && webgpuTotalValue !== 'NA') {
@@ -192,7 +192,7 @@ async function report(results) {
   // unit table
   let unitTable = '';
   if ('unit' in results) {
-    let targetResults = results['unit'];
+    let taskResults = results['unit'];
     unitTable = `<table><tr><th>unit</th><th>webgpu</th>`;
     for (let epIndex = 1; epIndex < epsLength; epIndex++) {
       let ep = util.allEps[epIndex];
@@ -203,14 +203,14 @@ async function report(results) {
     unitTable += '<tr><td></td>';
     for (let epIndex = 0; epIndex < epsLength; epIndex++) {
       let style;
-      if (targetResults[epIndex] === 'NA') {
+      if (taskResults[epIndex] === 'NA') {
         style = neutralStyle;
-      } else if (targetResults[epIndex].includes('FAILED')) {
+      } else if (taskResults[epIndex].includes('FAILED')) {
         style = badStyle;
       } else {
         style = goodStyle;
       }
-      unitTable += `<td ${style}>${targetResults[epIndex]}</td>`;
+      unitTable += `<td ${style}>${taskResults[epIndex]}</td>`;
     }
     unitTable += '</tr></table><br>';
   }
@@ -246,11 +246,11 @@ async function report(results) {
 
   // performance breakdown table
   let breakdownTable = '';
-  let target = 'performance';
-  if (target in results && util.breakdown) {
-    let targetResults = results[target];
+  let task = 'performance';
+  if (task in results && util.breakdown) {
+    let taskResults = results[task];
     let epsLength = util.allEps.length;
-    let metricsLength = util.targetMetrics[target].length;
+    let metricsLength = util.taskMetrics[task].length;
     let unit = ' (ms)';
     let style = neutralStyle;
     breakdownTable =
@@ -262,9 +262,9 @@ async function report(results) {
     }
     breakdownTable += '</tr>';
 
-    for (let resultIndex = 0; resultIndex < targetResults.length;
+    for (let resultIndex = 0; resultIndex < taskResults.length;
       resultIndex++) {
-      let result = targetResults[resultIndex];
+      let result = taskResults[resultIndex];
       let op_time = result[epsLength * metricsLength + 1];
       let TOP = 5;
       let enableTOP = false;

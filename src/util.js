@@ -14,7 +14,7 @@ let platform = os.platform();
 let allEps = ['webgpu', 'wasm', 'webnn'];
 
 // please make sure these metrics are shown up in order
-let targetMetrics = {
+let taskMetrics = {
   'conformance': ['result'],
   'performance': ['first', 'average', 'best']
 };
@@ -72,7 +72,7 @@ module.exports = {
   'parameters': parameters,
   'platform': platform,
   'allEps': allEps,
-  'targetMetrics': targetMetrics,
+  'taskMetrics': taskMetrics,
   'outDir': outDir,
   'toolkitUrl':
     'https://wp-27.sh.intel.com/workspace/project/webatintel/ort-toolkit',
