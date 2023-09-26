@@ -52,6 +52,10 @@ util.args =
       type: 'string',
       describe: 'ep for conformance, split by comma',
     })
+    .option('dev-mode', {
+      type: 'boolean',
+      describe: 'dev mode, and ort-toolkit url is different',
+    })
     .option('disable-breakdown', {
       type: 'boolean',
       describe: 'disable breakdown',
@@ -305,7 +309,13 @@ async function main() {
     util.breakdown = false;
   }
 
-  util.toolkitUrlArgs += `ortUrl=https://wp-27.sh.intel.com/workspace/project/onnxruntime&modelLocation=local`;
+  util.toolkitUrl = 'https://wp-27.sh.intel.com/workspace/project/';
+  if ('dev-mode' in util.args) {
+    util.toolkitUrl += 'webatintel/';
+  }
+  util.toolkitUrl += 'ort-toolkit'
+
+  util.toolkitUrlArgs += 'modelUrl=server&ortUrl=https://wp-27.sh.intel.com/workspace/project/onnxruntime'
 
   if ('toolkit-url-args' in util.args) {
     util.toolkitUrlArgs += `&${util.args['toolkit-url-args']}`;

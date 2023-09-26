@@ -74,8 +74,7 @@ module.exports = {
   'allEps': allEps,
   'taskMetrics': taskMetrics,
   'outDir': outDir,
-  'toolkitUrl':
-    'https://wp-27.sh.intel.com/workspace/project/webatintel/ort-toolkit',
+  'toolkitUrl': '',
   'toolkitUrlArgs': '',
   'timeout': 180 * 1000,
   'breakdown': false,
