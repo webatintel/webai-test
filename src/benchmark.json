@@ -1,14 +1,21 @@
 [
+  "albert-base-v2",
+  "bart-large-cnn-encoder",
+  "bert-base-cased",
+  "bert-base-uncased",
   "candy-8",
+  "clip-vit-base-patch16",
   "densenet-9",
+  "detr-resnet-50",
+  "dino-vitb16",
+  "distilgpt2",
+  "distilbert-base-uncased",
   "efficientnet-lite4-11",
   "emotion-ferplus-8",
+  "gpt2",
   "mobilenetv2-12",
   "resnet50-v2-7",
   "tinyyolov2-8",
-  "detr-resnet-50",
   "whisper-tiny-decoder",
-  "whisper-tiny-encoder",
-  "bart-large-cnn-encoder",
-  "t5-small-encoder"
+  "whisper-tiny-encoder"
 ]

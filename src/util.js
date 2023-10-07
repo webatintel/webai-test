@@ -5,7 +5,7 @@ const os = require('os');
 const path = require('path');
 
 let parameters = [
-  'model',
+  'modelName',
   'ep',
 ];
 

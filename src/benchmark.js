@@ -90,15 +90,15 @@ async function runBenchmark(task) {
     path.join(path.resolve(__dirname), util.args['benchmark-json']);
   let taskConfigs = JSON.parse(fs.readFileSync(benchmarkJson));
 
-  for (let model of taskConfigs) {
+  for (let modelName of taskConfigs) {
     let config = {};
-    if ('model' in util.args) {
-      config['model'] =
-        intersect(model, util.args['model'].split(','));
+    if ('model-name' in util.args) {
+      config['modelName'] =
+        intersect(modelName, util.args['model-name'].split(','));
     } else {
-      config['model'] = model;
+      config['modelName'] = modelName;
     }
-    if (!config['model']) {
+    if (!config['modelName']) {
       continue;
     }
 
