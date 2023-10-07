@@ -18,22 +18,14 @@ const util = require('./util.js');
 util.args =
   yargs.usage('node $0 [args]')
     .strict()
-    .option('model', {
+    .option('model-name', {
       type: 'string',
-      describe: 'model to run, split by comma',
+      describe: 'model name to run, split by comma',
     })
     .option('benchmark-json', {
       type: 'string',
       describe: 'benchmark json',
       default: 'benchmark.json',
-    })
-    .option('toolkit-url', {
-      type: 'string',
-      describe: 'toolkit url to test against',
-    })
-    .option('toolkit-url-args', {
-      type: 'string',
-      describe: 'extra toolkit url args',
     })
     .option('browser', {
       type: 'string',
@@ -118,6 +110,14 @@ util.args =
       describe: 'timestamp format, day or second',
       default: 'second',
     })
+    .option('toolkit-url', {
+      type: 'string',
+      describe: 'toolkit url to test against',
+    })
+    .option('toolkit-url-args', {
+      type: 'string',
+      describe: 'extra toolkit url args',
+    })
     .option('trace', {
       type: 'boolean',
       describe: 'trace',
@@ -156,27 +156,27 @@ util.args =
         'node $0 --tasks performance --toolkit-url http://127.0.0.1/workspace/project/tfjswebgpu/tfjs'
       ],
       [
-        'node $0 --tasks performance --model pose-detection --architecture BlazePose-heavy --input-size 256 --input-type tensor --performance-ep webgpu'
+        'node $0 --tasks performance --model-name pose-detection --architecture BlazePose-heavy --input-size 256 --input-type tensor --performance-ep webgpu'
       ],
       [
         'node $0 --browser-args="--enable-dawn-features=disable_workgroup_init --no-sandbox --enable-zero-copy"'
       ],
       [
-        'node $0 --tasks performance --model mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --server-info --new-context'
+        'node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --server-info --new-context'
       ],
       [
-        'node $0 --tasks performance --model mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --timestamp day'
+        'node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --timestamp day'
       ],
       [
-        'node $0 --tasks performance --model mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 3 --timestamp day --trace'
+        'node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 3 --timestamp day --trace'
       ],
       ['node $0 --tasks trace --trace-timestamp 20220601'],
       ['node $0 --tasks unit --unit-filter=add --unit-skip-build'],
       [
-        'node $0 --tasks conformance --conformance-ep webgpu --model mobilenetv2-12 --timestamp day --skip-config // single test'
+        'node $0 --tasks conformance --conformance-ep webgpu --model-name mobilenetv2-12 --timestamp day --skip-config // single test'
       ],
       [
-        'node $0 --tasks performance --performance-ep webgpu --model mobilenetv2-12 --timestamp day --skip-config // single test'
+        'node $0 --tasks performance --performance-ep webgpu --model-name mobilenetv2-12 --timestamp day --skip-config // single test'
       ],
       ['node $0 --tasks unit --unit-ep webgpu --timestamp day'],
     ])
