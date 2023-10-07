@@ -1,8 +1,8 @@
 'use strict';
 
+const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
 const puppeteer = require('puppeteer');
 const readline = require('readline');
 
@@ -90,10 +90,13 @@ async function runBenchmark(task) {
     path.join(path.resolve(__dirname), util.args['benchmark-json']);
   let taskConfigs = JSON.parse(fs.readFileSync(benchmarkJson));
 
-  for (let config of taskConfigs) {
+  for (let model of taskConfigs) {
+    let config = {};
     if ('model' in util.args) {
       config['model'] =
-        intersect(config['model'], util.args['model'].split(','));
+        intersect(model, util.args['model'].split(','));
+    } else {
+      config['model'] = model;
     }
     if (!config['model']) {
       continue;
@@ -114,7 +117,7 @@ async function runBenchmark(task) {
     } else if (task === 'performance') {
       if ('performance-ep' in util.args) {
         config['ep'] = util.args['performance-ep'].split(',');
-      } else if (!('ep' in config)) {
+      } else {
         config['ep'] = ['webgpu', 'wasm'];
       }
       for (let ep of config['ep']) {
@@ -233,8 +236,16 @@ async function runBenchmark(task) {
         util.runTimes = runTimes;
         url += `&warmupTimes=${warmupTimes}&runTimes=${runTimes}`;
       }
+
+      if (ep === 'wasm') {
+        url += `&wasmThreads=${util['wasmThreads']}`;
+      }
+
       console.log(url);
       await page.goto(url);
+      if (!('crossOriginIsolated' in util)) {
+        util['crossOriginIsolated'] = await page.evaluate(() => crossOriginIsolated);
+      }
 
       try {
         await page.waitForSelector('#result', { timeout: util.timeout });

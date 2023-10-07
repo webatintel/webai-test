@@ -233,14 +233,18 @@ async function report(results) {
   }
 
   for (let category
-    of ['toolkitUrl', 'toolkitUrlArgs', 'browserArgs', 'browserPath',
-      'chromeRevision', 'chromeVersion', 'clientRepoCommit',
-      'clientRepoDate', 'cpuName', 'duration', 'gpuDeviceId',
-      'gpuDriverVersion', 'gpuName', 'hostname', 'osVersion',
-      'platform', 'pthreadPoolSize', 'serverRepoCommit',
-      'serverRepoWebGPUDate', 'serverBuildWebGPUDate',
-      'wasmMultithread', 'wasmSIMD']) {
-    configTable += `<tr><td>${category}</td><td>${util[category]}</td></tr>`;
+    of ['browserArgs', 'browserPath', 'chromeRevision', 'chromeVersion', 'clientRepoCommit',
+      'clientRepoDate', 'cpuName', 'crossOriginIsolated', 'duration', 'gpuDeviceId',
+      'gpuDriverVersion', 'gpuName', 'hostname', 'osVersion', 'platform', 'serverRepoCommit',
+      'serverRepoWebGPUDate', 'serverBuildWebGPUDate', 'toolkitUrl', 'toolkitUrlArgs', 'wasmThreads']) {
+    let categoryFixup;
+    if (category === 'duration') {
+      categoryFixup = `${category} (s)`;
+    } else {
+      categoryFixup = category;
+    }
+
+    configTable += `<tr><td>${categoryFixup}</td><td>${util[category]}</td></tr>`;
   }
   configTable += '</table><br>'
 

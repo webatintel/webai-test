@@ -4,6 +4,7 @@ const { spawnSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const si = require('systeminformation');
 const yargs = require('yargs');
 
 const runBenchmark = require('./benchmark.js');
@@ -340,6 +341,9 @@ async function main() {
   if (!util.args['skip-config']) {
     await config();
   }
+
+  const cpuData = await si.cpu();
+  util.wasmThreads = Number(cpuData.physicalCores) / 2;
 
   let results = {};
   util.duration = '';

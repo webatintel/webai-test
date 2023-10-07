@@ -19,7 +19,6 @@ async function getConfig() {
     cpuName = cpuName.split(' ').slice(0, 3).join(' ');
   }
   util['cpuName'] = cpuName;
-  util['pthreadPoolSize'] = Math.min(4, Number(cpuData.physicalCores));
 
   // GPU
   if (util['platform'] === 'win32') {
