@@ -66,18 +66,22 @@ function sleep(ms) {
 }
 
 module.exports = {
-  'browserArgs':
+  allEps: allEps,
+  conformanceEps: [],
+  breakdown: false,
+  browserArgs:
     '--enable-features=WebAssemblyThreads,SharedArrayBuffer,WebAssemblySimd,MediaFoundationD3D11VideoCapture --start-maximized --enable-dawn-features=allow_unsafe_apis,use_dxc',
-  'hostname': os.hostname(),
-  'parameters': parameters,
-  'platform': platform,
-  'allEps': allEps,
-  'taskMetrics': taskMetrics,
-  'outDir': outDir,
-  'toolkitUrl': '',
-  'toolkitUrlArgs': '',
-  'timeout': 180 * 1000,
-  'breakdown': false,
+  hostname: os.hostname(),
+  outDir: outDir,
+  parameters: parameters,
+  performanceEps: [],
+  platform: platform,
+  taskMetrics: taskMetrics,
+  timeout: 180 * 1000,
+  toolkitUrl: '',
+  toolkitUrlArgs: '',
+  unitEps: [],
+
   capitalize: capitalize,
   ensureDir: ensureDir,
   ensureNoDir: ensureNoDir,
@@ -86,7 +90,4 @@ module.exports = {
   log: log,
   sleep: sleep,
   uncapitalize: uncapitalize,
-  conformanceEps: [],
-  performanceEps: [],
-  unitEps: [],
 };

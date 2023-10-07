@@ -28,5 +28,8 @@
   "editor.wrappingIndent": "none",
   "typescript.tsdk": "node_modules/typescript/lib",
   "clang-format.executable": "${workspaceRoot}/node_modules/.bin/clang-format",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  }
 }

@@ -1,30 +1,14 @@
 [
-  {
-    "model": "candy-8",
-    "ep": ["wasm", "webgpu"]
-  },
-  {
-    "model": "densenet-9",
-    "ep": ["wasm", "webgpu"]
-  },
-  {
-    "model": "efficientnet-lite4-11",
-    "ep": ["wasm", "webgpu"]
-  },
-  {
-    "model": "emotion-ferplus-8",
-    "ep": ["wasm", "webgpu"]
-  },
-  {
-    "model": "mobilenetv2-12",
-    "ep": ["wasm", "webgpu"]
-  },
-  {
-    "model": "resnet50-v2-7",
-    "ep": ["wasm", "webgpu"]
-  },
-  {
-    "model": "tinyyolov2-8",
-    "ep": ["wasm", "webgpu"]
-  }
+  "candy-8",
+  "densenet-9",
+  "efficientnet-lite4-11",
+  "emotion-ferplus-8",
+  "mobilenetv2-12",
+  "resnet50-v2-7",
+  "tinyyolov2-8",
+  "detr-resnet-50",
+  "whisper-tiny-decoder",
+  "whisper-tiny-encoder",
+  "bart-large-cnn-encoder",
+  "t5-small-encoder"
 ]
