@@ -179,6 +179,7 @@ util.args =
         'node $0 --tasks performance --performance-ep webgpu --model-name mobilenetv2-12 --timestamp day --skip-config // single test'
       ],
       ['node $0 --tasks unit --unit-ep webgpu --timestamp day'],
+      ['node $0 --tasks conformance --timestamp day --benchmark-json benchmark-wip.json --dev-mode'],
     ])
     .help()
     .wrap(180)
