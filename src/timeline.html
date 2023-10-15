@@ -59,8 +59,8 @@
       td.innerHTML = 'Total (ms)';
       for (let i = 0; i < length; i++) {
         let td = row.insertCell(i + 1);
-        let cpuTfjsLength = jsonData[i]['CPU-TFJS'].length;
-        td.innerHTML = (jsonData[i]['CPU-TFJS'][cpuTfjsLength - 1][1] - jsonData[i]['CPU-TFJS'][0][1]).toFixed(2);
+        let cpuOrtLength = jsonData[i]['CPU-ORT'].length;
+        td.innerHTML = (jsonData[i]['CPU-ORT'][cpuOrtLength - 1][1] - jsonData[i]['CPU-ORT'][0][1]).toFixed(2);
         td.style = i === index ? highlightStyle : commonStyle;
       }
 
@@ -120,7 +120,7 @@
       let visGroups = new vis.DataSet(groupsDataSet);
       let visItems = new vis.DataSet(itemsDataSet);
       let container = document.getElementById('timeline');
-      let cpuTfjsLength = jsonData[index]['CPU-TFJS'].length;
+      let cpuOrtLength = jsonData[index]['CPU-ORT'].length;
       let options = {
         groupOrder: function (a, b) {
           return a.id - b.id;
@@ -128,8 +128,8 @@
         order: function (a, b) {
           return b.id - a.id;
         },
-        start: strToTime(jsonData[index]['CPU-TFJS'][0][1] - 1),
-        end: strToTime(jsonData[index]['CPU-TFJS'][cpuTfjsLength - 1][1] + 1),
+        start: strToTime(jsonData[index]['CPU-ORT'][0][1] - 1),
+        end: strToTime(jsonData[index]['CPU-ORT'][cpuOrtLength - 1][1] + 1),
         locale: 'en',
         editable: false,
         showTooltips: true,

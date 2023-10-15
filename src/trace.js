@@ -53,22 +53,22 @@ function parseTrace() {
 
         if (eventName === 'TimeStamp') {
           let message = event['args']['data']['message'];
-          if (message === 'TFJS::predictStart') {
-            timelineJson.push({ 'CPU-TFJS': [], 'CPU-CHROME': [], 'GPU': [] });
+          if (message === 'ORT::predictStart') {
+            timelineJson.push({ 'CPU-ORT': [], 'CPU-CHROME': [], 'GPU': [] });
           }
 
-          if (message.startsWith('TFJS::GPU::')) {
-            for (let item of JSON.parse(message.replace('TFJS::GPU::', ''))) {
+          if (message.startsWith('ORT::GPU::')) {
+            for (let item of JSON.parse(message.replace('ORT::GPU::', ''))) {
               let query = item['query'];
               timelineJson[timelineJson.length - 1]['GPU'].push([
                 item['name'], getMs('GPU', query[0]), getMs('GPU', query[1])
               ]);
             }
-          } else if (message.startsWith('TFJS::')) {
+          } else if (message.startsWith('ORT::')) {
             if (timeShift === 0) {
               timeShift = -getMs('CPU', event['ts']);
             }
-            timelineJson[timelineJson.length - 1]['CPU-TFJS'].push(
+            timelineJson[timelineJson.length - 1]['CPU-ORT'].push(
               [message, getMs('CPU', event['ts'])]);
           }
         } else if (chromeEventNames.indexOf(eventName) >= 0) {
