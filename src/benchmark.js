@@ -337,7 +337,7 @@ async function runBenchmark(task) {
     if ('upload' in util.args) {
       let result = spawnSync('scp', [
         file,
-        `wp@wp-27.sh.intel.com:/workspace/project/work/tfjs/perf/${util.platform}/${util['gpuDeviceId']}`
+        `wp@wp-27.sh.intel.com:/workspace/project/work/ort/perf/${util.platform}/${util['gpuDeviceId']}`
       ]);
       if (result.status !== 0) {
         util.log('[ERROR] Failed to upload report');

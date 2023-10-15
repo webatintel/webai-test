@@ -41,7 +41,7 @@ async function upload() {
     }
 
     // check if file exists in remote
-    let serverFolder = `/workspace/project/work/tfjs/perf/${util.platform}/${
+    let serverFolder = `/workspace/project/work/ort/perf/${util.platform}/${
         util['gpuDeviceId']}`;
     result = spawnSync(
         'ssh', ['wp@wp-27.sh.intel.com', `ls ${serverFolder}/${fileName}`]);

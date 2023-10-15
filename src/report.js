@@ -220,15 +220,7 @@ async function report(results) {
   if ('upload' in util.args || 'server-info' in util.args) {
     util['serverRepoCommit'] =
       execSync(
-        'ssh wp@wp-27.sh.intel.com "cd /workspace/project/tfjswebgpu/tfjs && git rev-parse HEAD"')
-        .toString();
-    util['serverRepoWebGPUDate'] =
-      execSync(
-        'ssh wp@wp-27.sh.intel.com "cd /workspace/project/tfjswebgpu/tfjs && git log -1 --format=%ci tfjs-ep-webgpu"')
-        .toString();
-    util['serverBuildWebGPUDate'] =
-      execSync(
-        'ssh wp@wp-27.sh.intel.com "cd /workspace/project/tfjswebgpu/tfjs && stat --format=%y dist/bin/tfjs-ep-webgpu/dist/tf-ep-webgpu.js"')
+        'ssh wp@wp-27.sh.intel.com "cd /workspace/project/onnxruntime && git rev-parse HEAD"')
         .toString();
   }
 
@@ -236,7 +228,7 @@ async function report(results) {
     of ['browserArgs', 'browserPath', 'chromeRevision', 'chromeVersion', 'clientRepoCommit',
       'clientRepoDate', 'cpuName', 'crossOriginIsolated', 'duration', 'gpuDeviceId',
       'gpuDriverVersion', 'gpuName', 'hostname', 'osVersion', 'platform', 'runTimes', 'serverRepoCommit',
-      'serverRepoWebGPUDate', 'serverBuildWebGPUDate', 'toolkitUrl', 'toolkitUrlArgs', 'warmupTimes', 'wasmThreads']) {
+      'toolkitUrl', 'toolkitUrlArgs', 'warmupTimes', 'wasmThreads']) {
     let categoryFixup;
     if (category === 'duration') {
       categoryFixup = `${category} (s)`;
@@ -324,13 +316,6 @@ async function report(results) {
 
   if ('email' in util.args) {
     let subject = '[ORT-TEST] ' + util['hostname'] + ' ' + util.timestamp;
-    if (util['serverRepoWebGPUDate'] && util['serverBuildWebGPUDate']) {
-      if (new Date(util['serverRepoWebGPUDate']) >
-        new Date(util['serverBuildWebGPUDate'])) {
-        subject += ' (WebGPU build failed in server)'
-      }
-    }
-
     await sendMail(util.args['email'], subject, html);
   }
 }

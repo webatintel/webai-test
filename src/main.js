@@ -11,7 +11,6 @@ const runBenchmark = require('./benchmark.js');
 const config = require('./config.js');
 const report = require('./report.js');
 const parseTrace = require('./trace.js');
-const runUnit = require('./unit.js');
 const upload = require('./upload.js');
 const util = require('./util.js');
 
@@ -98,7 +97,7 @@ util.args =
     .option('tasks', {
       type: 'string',
       describe:
-        'test tasks, split by comma, can be conformance, performance, unit, trace, upload and so on.',
+        'test tasks, split by comma, can be conformance, performance, trace, upload and so on.',
       default: 'conformance,performance',
     })
     .option('ort-dir', {
@@ -126,18 +125,6 @@ util.args =
       type: 'string',
       describe: 'trace timestamp',
     })
-    .option('unit-ep', {
-      type: 'string',
-      describe: 'ep for unit, split by comma',
-    })
-    .option('unit-filter', {
-      type: 'string',
-      describe: 'filter for unit test',
-    })
-    .option('unit-skip-build', {
-      type: 'boolean',
-      describe: 'skip build for unit test',
-    })
     .option('upload', {
       type: 'boolean',
       describe: 'upload result to server',
@@ -153,7 +140,7 @@ util.args =
     .example([
       ['node $0 --email a@intel.com;b@intel.com // Send report to emails'],
       [
-        'node $0 --tasks performance --toolkit-url http://127.0.0.1/workspace/project/tfjswebgpu/tfjs'
+        'node $0 --tasks performance --toolkit-url http://127.0.0.1/workspace/project/onnxruntime'
       ],
       [
         'node $0 --tasks performance --model-name pose-detection --architecture BlazePose-heavy --input-size 256 --input-type tensor --performance-ep webgpu'
@@ -171,14 +158,12 @@ util.args =
         'node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 3 --timestamp day --trace'
       ],
       ['node $0 --tasks trace --trace-timestamp 20220601'],
-      ['node $0 --tasks unit --unit-filter=add --unit-skip-build'],
       [
         'node $0 --tasks conformance --conformance-ep webgpu --model-name mobilenetv2-12 --timestamp day --skip-config // single test'
       ],
       [
         'node $0 --tasks performance --performance-ep webgpu --model-name mobilenetv2-12 --timestamp day --skip-config // single test'
       ],
-      ['node $0 --tasks unit --unit-ep webgpu --timestamp day'],
       ['node $0 --tasks conformance --timestamp day --benchmark-json benchmark-wip.json --dev-mode'],
     ])
     .help()
@@ -384,8 +369,6 @@ async function main() {
           util.runTimes === 0)) {
           results[task] = await runBenchmark(task);
         }
-      } else if (task === 'unit') {
-        results[task] = await runUnit();
       } else if (task === 'trace') {
         await parseTrace();
       }
