@@ -15,7 +15,8 @@
     "editor.formatOnSave": true
   },
   "[javascript]": {
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   "[cpp]": {
     "editor.formatOnSave": true
