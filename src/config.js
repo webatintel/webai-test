@@ -128,7 +128,7 @@ async function getExtraConfig() {
   util['chromeVersion'] =
       await versionElement.evaluate(element => element.innerText);
 
-  // gpuDriverVersion and gpuDeviceId
+  // gpuDriverVersion and
   await page.goto('chrome://gpu');
   let gpuInfo = await page.evaluate(() => {
     try {

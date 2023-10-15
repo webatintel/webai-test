@@ -335,9 +335,16 @@ async function runBenchmark(task) {
     let file = path.join(util.timestampDir, fileName);
     fs.writeFileSync(file, JSON.stringify(results));
     if ('upload' in util.args) {
-      let result = spawnSync('scp', [
+      // Ensure server has the device folder
+      let serverFolder = `/workspace/project/work/ort/perf/${util.platform}/${util['gpuDeviceId']}`;
+      let result = spawnSync('ssh', ['wp@wp-27.sh.intel.com', `ls ${serverFolder}`]);
+      if (result.status != 0) {
+        spawnSync('ssh', ['wp@wp-27.sh.intel.com', `mkdir -p ${serverFolder}`]);
+      }
+
+      result = spawnSync('scp', [
         file,
-        `wp@wp-27.sh.intel.com:/workspace/project/work/ort/perf/${util.platform}/${util['gpuDeviceId']}`
+        `wp@wp-27.sh.intel.com:${serverFolder}`
       ]);
       if (result.status !== 0) {
         util.log('[ERROR] Failed to upload report');
