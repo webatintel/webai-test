@@ -16,6 +16,7 @@
   "mobilenetv2-12",
   "resnet50-v2-7",
   "sam-b-decoder",
+  "sd-vae-decoder-f16",
   "sd-vae-encoder",
   "t5-small-decoder",
   "t5-small-encoder",
