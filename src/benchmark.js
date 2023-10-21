@@ -241,6 +241,10 @@ async function runBenchmark(task) {
         url += `&wasmThreads=${util['wasmThreads']}`;
       }
 
+      if (util.updateModelNames.indexOf(modelName) >= 0) {
+        url += '&updateModel=true';
+      }
+
       console.log(url);
       await page.goto(url);
       if (!('crossOriginIsolated' in util)) {
