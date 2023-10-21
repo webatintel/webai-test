@@ -81,6 +81,7 @@ module.exports = {
   toolkitUrl: '',
   toolkitUrlArgs: '',
   unitEps: [],
+  updateModelNames: ['sd-vae-decoder-f16'],
 
   capitalize: capitalize,
   ensureDir: ensureDir,
