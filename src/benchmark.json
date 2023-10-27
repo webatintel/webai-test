@@ -3,7 +3,6 @@
   "bart-large-cnn-encoder",
   "bert-base-cased",
   "bert-base-uncased",
-  "candy-8",
   "clip-vit-base-patch16",
   "densenet-9",
   "detr-resnet-50",
