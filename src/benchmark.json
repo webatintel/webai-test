@@ -12,6 +12,7 @@
   "efficientnet-lite4-11",
   "emotion-ferplus-8",
   "gpt2",
+  "m2m100-encoder",
   "mobilenetv2-12",
   "resnet50-v2-7",
   "sam-b-decoder",
