@@ -119,6 +119,12 @@ async function runBenchmark(task) {
         config['ep'] = util.args['performance-ep'].split(',');
       } else {
         config['ep'] = taskConfigs[modelName];
+        if (util.hostname !== 'shwdeweb1303') {
+          let index = config['ep'].indexOf('webnn');
+          if (index >= 0) {
+            config['ep'].splice(index, 1);
+          }
+        }
       }
       for (let ep of config['ep']) {
         if (util.performanceEps.indexOf(ep) < 0) {

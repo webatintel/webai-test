@@ -21,7 +21,8 @@
   ],
   "densenet-9": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "detr-resnet-50": [
     "webgpu",
@@ -41,7 +42,8 @@
   ],
   "efficientnet-lite4-11": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "emotion-ferplus-8": [
     "webgpu",
