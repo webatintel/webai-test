@@ -219,8 +219,7 @@ async function report(results) {
   let configTable = '<table><tr><th>Category</th><th>Info</th></tr>';
   if ('upload' in util.args || 'server-info' in util.args) {
     util['serverRepoCommit'] =
-      execSync(
-        'ssh wp@wp-27.sh.intel.com "cd /workspace/project/onnxruntime && git rev-parse HEAD"')
+      execSync(util.ssh, ['wp@wp-27.sh.intel.com', '"cd /workspace/project/onnxruntime && git rev-parse HEAD"'])
         .toString();
   }
 

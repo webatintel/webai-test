@@ -341,12 +341,12 @@ async function runBenchmark(task) {
     if ('upload' in util.args) {
       // Ensure server has the device folder
       let serverFolder = `/workspace/project/work/ort/perf/${util.platform}/${util['gpuDeviceId']}`;
-      let result = spawnSync('ssh', ['wp@wp-27.sh.intel.com', `ls ${serverFolder}`]);
+      let result = spawnSync(util.ssh, ['wp@wp-27.sh.intel.com', `ls ${serverFolder}`]);
       if (result.status != 0) {
-        spawnSync('ssh', ['wp@wp-27.sh.intel.com', `mkdir -p ${serverFolder}`]);
+        spawnSync(util.ssh, ['wp@wp-27.sh.intel.com', `mkdir -p ${serverFolder}`]);
       }
 
-      result = spawnSync('scp', [
+      result = spawnSync(util.scp, [
         file,
         `wp@wp-27.sh.intel.com:${serverFolder}`
       ]);
