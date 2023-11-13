@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const {spawnSync} = require('child_process')
+const { spawnSync } = require('child_process')
 
 const util = require('./util.js')
 
@@ -29,7 +29,7 @@ async function upload() {
     // check if date is in range
     let folderDate = folder.substring(0, 8);
     if (parseInt(folderDate) < parseInt(startDate) ||
-        parseInt(folderDate) > parseInt(endDate)) {
+      parseInt(folderDate) > parseInt(endDate)) {
       continue;
     }
     let fileName = `${folderDate}.json`;
@@ -41,10 +41,9 @@ async function upload() {
     }
 
     // check if file exists in remote
-    let serverFolder = `/workspace/project/work/ort/perf/${util.platform}/${
-        util['gpuDeviceId']}`;
+    let serverFolder = `/workspace/project/work/ort/perf/${util.platform}/${util['gpuDeviceId']}`;
     result = spawnSync(
-        'ssh', ['wp@wp-27.sh.intel.com', `ls ${serverFolder}/${fileName}`]);
+      util.ssh, ['wp@wp-27.sh.intel.com', `ls ${serverFolder}/${fileName}`]);
     if (result.status == 0) {
       util.log(`[INFO] ${fullPath} already exists in server`);
       continue;
@@ -52,7 +51,7 @@ async function upload() {
 
     // upload the file
     result =
-        spawnSync('scp', [fullPath, `wp@wp-27.sh.intel.com:${serverFolder}`]);
+      spawnSync(util.scp, [fullPath, `wp@wp-27.sh.intel.com:${serverFolder}`]);
     if (result.status !== 0) {
       util.log(`[ERROR] ${fullPath} Failed to upload`);
     } else {
