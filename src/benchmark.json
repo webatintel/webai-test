@@ -1,23 +1,28 @@
 {
   "albert-base-v2": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "bart-large-cnn-encoder": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "bert-base-cased": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "bert-base-uncased": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "clip-vit-base-patch16": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "densenet-9": [
     "webgpu",
@@ -26,19 +31,23 @@
   ],
   "detr-resnet-50": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "dino-vitb16": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "distilbert-base-uncased": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "distilgpt2": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "efficientnet-lite4-11": [
     "webgpu",
@@ -51,11 +60,13 @@
   ],
   "gpt2": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "m2m100-encoder": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "mobilenetv2-12": [
     "webgpu",
@@ -69,42 +80,52 @@
   ],
   "sam-b-decoder": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "sam-b-encoder": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "sd-vae-decoder": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "sd-vae-decoder-f16": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "sd-vae-encoder": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "t5-small-decoder": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "t5-small-encoder": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "tinyyolov2-8": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "whisper-tiny-decoder": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ],
   "whisper-tiny-encoder": [
     "webgpu",
-    "wasm"
+    "wasm",
+    "webnn"
   ]
 }
