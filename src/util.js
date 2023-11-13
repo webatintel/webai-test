@@ -22,6 +22,9 @@ let taskMetrics = {
 const outDir = path.join(path.resolve(__dirname), '../out');
 ensureDir(outDir);
 
+const sshKey = path.join(os.homedir(), '.ssh/id_rsa_common');
+const remoteCmdArgs = fs.existsSync(sshKey) ? `-i ${sshKey}` : '';
+
 function capitalize(s) {
   return s[0].toUpperCase() + s.slice(1);
 }
@@ -82,6 +85,8 @@ module.exports = {
   toolkitUrlArgs: '',
   unitEps: [],
   updateModelNames: [],
+  scp: `scp ${remoteCmdArgs}`,
+  ssh: `ssh ${remoteCmdArgs}`,
 
   capitalize: capitalize,
   ensureDir: ensureDir,
