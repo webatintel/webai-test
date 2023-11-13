@@ -90,7 +90,7 @@ async function runBenchmark(task) {
     path.join(path.resolve(__dirname), util.args['benchmark-json']);
   let taskConfigs = JSON.parse(fs.readFileSync(benchmarkJson));
 
-  for (let modelName of taskConfigs) {
+  for (let modelName in taskConfigs) {
     let config = {};
     if ('model-name' in util.args) {
       config['modelName'] =
@@ -118,7 +118,7 @@ async function runBenchmark(task) {
       if ('performance-ep' in util.args) {
         config['ep'] = util.args['performance-ep'].split(',');
       } else {
-        config['ep'] = ['webgpu', 'wasm'];
+        config['ep'] = taskConfigs[modelName];
       }
       for (let ep of config['ep']) {
         if (util.performanceEps.indexOf(ep) < 0) {
@@ -140,7 +140,7 @@ async function runBenchmark(task) {
   let benchmarksLength = benchmarks.length;
   let previousModelName = '';
 
-  // format: testName, first_webgpu, average_webgpu, best_webgpu, first_wasm, average_wasm, best_wasm {op: {webgpu, wasm}}
+  // format: testName, first_webgpu, average_webgpu, best_webgpu, first_wasm, average_wasm, best_wasm, first_webnn, average_webnn, best_webnn {op: {webgpu, wasm}}
   let results = [];
   let defaultValue = 'NA';
   let epsLength = util.allEps.length;
@@ -279,7 +279,7 @@ async function runBenchmark(task) {
             'false';
         }
         util.hasError = false;
-        continue;
+        //continue;
       }
 
       // handle result
