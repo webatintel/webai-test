@@ -22,6 +22,8 @@ let taskMetrics = {
 const outDir = path.join(path.resolve(__dirname), '../out');
 ensureDir(outDir);
 
+const server = 'wp@wp-27.sh.intel.com';
+
 const sshKey = path.join(os.homedir(), '.ssh/id_rsa_common');
 const remoteCmdArgs = fs.existsSync(sshKey) ? `-i ${sshKey}` : '';
 
@@ -68,6 +70,14 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function scp(src, dest) {
+  return `scp ${remoteCmdArgs} ${src} ${dest}`;
+}
+
+function ssh(cmd) {
+  return `ssh ${remoteCmdArgs} ${server} ${cmd}`
+}
+
 module.exports = {
   allEps: allEps,
   conformanceEps: [],
@@ -75,6 +85,7 @@ module.exports = {
   browserArgs:
     '--enable-features=WebAssemblyThreads,SharedArrayBuffer,WebAssemblySimd,MediaFoundationD3D11VideoCapture --start-maximized --enable-dawn-features=allow_unsafe_apis,use_dxc --enable-webgpu-developer-features --enable-features=MachineLearningNeuralNetworkService --enable-experimental-web-platform-features',
   hostname: os.hostname(),
+  server: server,
   outDir: outDir,
   parameters: parameters,
   performanceEps: [],
@@ -85,8 +96,6 @@ module.exports = {
   toolkitUrlArgs: '',
   unitEps: [],
   updateModelNames: [],
-  scp: `scp ${remoteCmdArgs}`,
-  ssh: `ssh ${remoteCmdArgs}`,
 
   capitalize: capitalize,
   ensureDir: ensureDir,
@@ -96,4 +105,6 @@ module.exports = {
   log: log,
   sleep: sleep,
   uncapitalize: uncapitalize,
+  scp: scp,
+  ssh: ssh,
 };

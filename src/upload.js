@@ -43,7 +43,7 @@ async function upload() {
     // check if file exists in remote
     let serverFolder = `/workspace/project/work/ort/perf/${util.platform}/${util['gpuDeviceId']}`;
     result = spawnSync(
-      util.ssh, ['wp@wp-27.sh.intel.com', `ls ${serverFolder}/${fileName}`]);
+      util.ssh(`ls ${serverFolder}/${fileName}`), { shell: true });
     if (result.status == 0) {
       util.log(`[INFO] ${fullPath} already exists in server`);
       continue;
@@ -51,7 +51,7 @@ async function upload() {
 
     // upload the file
     result =
-      spawnSync(util.scp, [fullPath, `wp@wp-27.sh.intel.com:${serverFolder}`]);
+      spawnSync(util.scp(fullPath, `${util.server}:${serverFolder}`), { shell: true });
     if (result.status !== 0) {
       util.log(`[ERROR] ${fullPath} Failed to upload`);
     } else {
