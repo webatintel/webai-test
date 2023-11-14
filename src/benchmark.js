@@ -262,7 +262,7 @@ async function runBenchmark(task) {
         await page.waitForSelector('#result', { timeout: util.timeout });
         testResult = await page.$eval('#result', el => el.textContent);
       } catch (error) {
-        testResult = defaultValue;
+        testResult = '{"result": false}';
       }
 
       // handle errorMsg
