@@ -271,7 +271,7 @@ async function runBenchmark(task) {
       } catch (error) {
         console.log('Could not get result');
         if (task === 'conformance') {
-          testResult = '{"result": "false"}';
+          testResult = '{"result":false}';
         } else if (task === 'performance') {
           testResult = '{"first":"NA","average":"NA","best":"NA"}';
         }
