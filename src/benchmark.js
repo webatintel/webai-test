@@ -146,7 +146,7 @@ async function runBenchmark(task) {
   let benchmarksLength = benchmarks.length;
   let previousModelName = '';
 
-  // format: testName, first_webgpu, average_webgpu, best_webgpu, first_wasm, average_wasm, best_wasm, first_webnn, average_webnn, best_webnn {op: {webgpu, wasm}}
+  // format: testName, first_webgpu, average_webgpu, best_webgpu, first_wasm, average_wasm, best_wasm, first_webnn, average_webnn, best_webnn
   let results = [];
   let defaultValue = 'NA';
   let epsLength = util.allEps.length;
@@ -172,6 +172,7 @@ async function runBenchmark(task) {
     let modelName = benchmark.slice(0, -1).join('-');
     let ep = benchmark[benchmark.length - 1];
     let epIndex = util.allEps.indexOf(ep);
+    let testResult;
 
     util.log(`[${i + 1}/${benchmarksLength}] ${benchmark}`);
 
@@ -259,7 +260,9 @@ async function runBenchmark(task) {
 
       try {
         await page.waitForSelector('#result', { timeout: util.timeout });
+        testResult = await page.$eval('#result', el => el.textContent);
       } catch (error) {
+        testResult = defaultValue;
       }
 
       // handle errorMsg
@@ -290,42 +293,10 @@ async function runBenchmark(task) {
 
       // handle result
       let metricIndex = 0;
-      let testResult = await page.$eval('#result', el => el.textContent);
       let testResults = JSON.parse(testResult);
       while (metricIndex < metricsLength) {
         results[results.length - 1][epIndex * resultMetricsLength + metricIndex + 1] = testResults[util.taskMetrics[task][metricIndex]];
         metricIndex += 1;
-      }
-
-      // get breakdown data
-      if (task === 'performance' && util.breakdown) {
-        try {
-          await page.waitForSelector(
-            '#kernels > tbody > tr:nth-child(1)', { timeout: util.timeout });
-          let row = 1;
-          while (true) {
-            let op = await page.$eval(
-              '#kernels > tbody > tr:nth-child(' + row +
-              ') > td:nth-child(1) > span',
-              el => el.title);
-            if (op.substr(-4, 4) === '__op') {
-              row += 1;
-              continue;
-            }
-            let time = await page.$eval(
-              '#kernels > tbody > tr:nth-child(' + row +
-              ') > td:nth-child(2)',
-              el => el.textContent);
-            let op_time =
-              results[results.length - 1][epsLength * resultMetricsLength + 1];
-            if (!(op in op_time)) {
-              op_time[op] = Array(epsLength).fill(defaultValue);
-            }
-            op_time[op][epIndex] = parseFloat(time);
-            row += 1;
-          }
-        } catch (error) {
-        }
       }
     }
 
