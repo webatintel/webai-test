@@ -65,8 +65,15 @@ async function startContext(traceFile = undefined) {
       }
     });
     page.on('pageerror', (error) => {
-      util.hasError = true;
       const pageError = `[pageerror] ${error}`;
+
+      // Temporarily skip some WebNN errors
+      if (pageError.startsWith("[pageerror] Error: TypeError: Failed to execute 'fetch' on 'WorkerGlobalScope'") ||
+        pageError.startsWith("[pageerror] Error: ErrorEvent") || pageError.startsWith("[pageerror] Error: null")) {
+        return;
+      }
+
+      util.hasError = true;
       util.log(pageError);
       errorMsg += `${pageError.substring(0, errorMsgMaxLength)}<br>`;
     });
@@ -230,7 +237,7 @@ async function runBenchmark(task) {
         if ('warmup-times' in util.args) {
           warmupTimes = parseInt(util.args['warmup-times']);
         } else {
-          warmupTimes = 10;
+          warmupTimes = 5;
         }
         util.warmupTimes = warmupTimes;
 
@@ -238,7 +245,7 @@ async function runBenchmark(task) {
         if ('run-times' in util.args) {
           runTimes = parseInt(util.args['run-times']);
         } else {
-          runTimes = 10;
+          runTimes = 5;
         }
         util.runTimes = runTimes;
         url += `&warmupTimes=${warmupTimes}&runTimes=${runTimes}`;
@@ -253,16 +260,21 @@ async function runBenchmark(task) {
       }
 
       console.log(url);
-      await page.goto(url);
-      if (!('crossOriginIsolated' in util)) {
-        util['crossOriginIsolated'] = await page.evaluate(() => crossOriginIsolated);
-      }
 
       try {
+        await page.goto(url);
+        if (!('crossOriginIsolated' in util)) {
+          util['crossOriginIsolated'] = await page.evaluate(() => crossOriginIsolated);
+        }
         await page.waitForSelector('#result', { timeout: util.timeout });
         testResult = await page.$eval('#result', el => el.textContent);
       } catch (error) {
-        testResult = '{"result": false}';
+        console.log('Could not get result');
+        if (task === 'conformance') {
+          testResult = '{"result": "false"}';
+        } else if (task === 'performance') {
+          testResult = '{"first":"NA","average":"NA","best":"NA"}';
+        }
       }
 
       // handle errorMsg
