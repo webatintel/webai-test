@@ -114,7 +114,7 @@ async function runBenchmark(task) {
         config['ep'] = util.args['conformance-ep'].split(',');
       } else {
         // eps in json file are ignored for conformance
-        config['ep'] = ['webgpu'];
+        config['ep'] = ['webgpu', 'webnn'];
       }
       for (let ep of config['ep']) {
         if (util.conformanceEps.indexOf(ep) < 0) {
