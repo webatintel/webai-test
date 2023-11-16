@@ -133,7 +133,7 @@ async function runBenchmark(task) {
       if ('conformance-ep' in util.args) {
         config['ep'] = util.args['conformance-ep'].split(',');
       } else {
-        config['ep'] = util.allEps;
+        config['ep'] = structuredClone(util.allEps);
         let index = config['ep'].indexOf('wasm');
         if (index >= 0) {
           config['ep'].splice(index, 1);
@@ -149,7 +149,7 @@ async function runBenchmark(task) {
       if ('performance-ep' in util.args) {
         config['ep'] = util.args['performance-ep'].split(',');
       } else {
-        config['ep'] = util.allEps;
+        config['ep'] = structuredClone(util.allEps);
         removeSlowEps(config['ep']);
       }
       for (let ep of config['ep']) {
