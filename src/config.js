@@ -1,6 +1,6 @@
 'use strict';
 
-const {exec, execSync} = require('child_process');
+const { exec, execSync } = require('child_process');
 const { exit } = require('process');
 const puppeteer = require('puppeteer');
 const si = require('systeminformation');
@@ -23,10 +23,10 @@ async function getConfig() {
   // GPU
   if (util['platform'] === 'win32') {
     const info =
-        execSync(
-            'wmic path win32_VideoController get Name,DriverVersion,Status,PNPDeviceID /value')
-            .toString()
-            .split('\n');
+      execSync(
+        'wmic path win32_VideoController get Name,DriverVersion,Status,PNPDeviceID /value')
+        .toString()
+        .split('\n');
     for (let i = 1; i < info.length; i++) {
       let match;
       match = info[i].match('DriverVersion=(.*)');
@@ -40,6 +40,10 @@ async function getConfig() {
       match = info[i].match('PNPDeviceID=.*DEV_(.{4})');
       if (match) {
         util['gpuDeviceId'] = match[1].toUpperCase();
+      }
+      match = info[i].match('PNPDeviceID=.*VEN_(.{4})');
+      if (match) {
+        util['gpuVendorId'] = match[1].toUpperCase();
       }
       match = info[i].match('Status=(.*)');
       if (match) {
@@ -83,9 +87,9 @@ async function getConfig() {
   // Chrome
   if (util['platform'] === 'win32' && util.args['browser'].match('chrome_')) {
     const info = execSync(
-                     `reg query "HKEY_CURRENT_USER\\Software\\Google\\` +
-                     util['chromePath'] + `\\BLBeacon" /v version`)
-                     .toString();
+      `reg query "HKEY_CURRENT_USER\\Software\\Google\\` +
+      util['chromePath'] + `\\BLBeacon" /v version`)
+      .toString();
     const match = info.match('REG_SZ (.*)');
     util['chromeVersion'] = match[1];
   }
@@ -112,12 +116,12 @@ async function getExtraConfig() {
   // Chrome version and revision
   await page.goto('chrome://version');
   const chromeNameElem =
-      await page.$('#inner > tbody > tr:nth-child(1) > td.label');
+    await page.$('#inner > tbody > tr:nth-child(1) > td.label');
   let chromeName = await chromeNameElem.evaluate(element => element.innerText);
   const chromeRevisionElem =
-      await page.$('#inner > tbody > tr:nth-child(2) > td.version');
+    await page.$('#inner > tbody > tr:nth-child(2) > td.version');
   util['chromeRevision'] =
-      await chromeRevisionElem.evaluate(element => element.innerText);
+    await chromeRevisionElem.evaluate(element => element.innerText);
 
   if (chromeName.includes('Chromium')) {
     chromeName = 'Chromium';
@@ -126,21 +130,21 @@ async function getExtraConfig() {
   }
   const versionElement = await page.$('#version');
   util['chromeVersion'] =
-      await versionElement.evaluate(element => element.innerText);
+    await versionElement.evaluate(element => element.innerText);
 
   // gpuDriverVersion and
   await page.goto('chrome://gpu');
   let gpuInfo = await page.evaluate(() => {
     try {
       let value = document.querySelector('info-view')
-                      .shadowRoot.querySelector('#basic-info')
-                      .querySelector('info-view-table')
-                      .shadowRoot.querySelector('#info-view-table')
-                      .children[4]
-                      .shadowRoot.querySelector('#value')
-                      .innerText;
+        .shadowRoot.querySelector('#basic-info')
+        .querySelector('info-view-table')
+        .shadowRoot.querySelector('#info-view-table')
+        .children[4]
+        .shadowRoot.querySelector('#value')
+        .innerText;
       let match =
-          value.match('DEVICE=0x([A-Za-z0-9]{4}).*DRIVER_VERSION=(.*) ');
+        value.match('DEVICE=0x([A-Za-z0-9]{4}).*DRIVER_VERSION=(.*) ');
       return [match[1], match[2]];
     } catch (error) {
       return ['ffff', 'NA'];

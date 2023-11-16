@@ -11,7 +11,7 @@ let parameters = [
 
 let platform = os.platform();
 
-let allEps = ['webgpu', 'wasm', 'webnn'];
+let allEps = ['webgpu', 'wasm', 'webnn-gpu', 'webnn-cpu'];
 
 // please make sure these metrics are shown up in order
 let taskMetrics = {

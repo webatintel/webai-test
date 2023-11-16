@@ -74,6 +74,7 @@ async function startContext(traceFile = undefined) {
       }
 
       util.hasError = true;
+      util.errorMsg = pageError;
       util.log(pageError);
       errorMsg += `${pageError.substring(0, errorMsgMaxLength)}<br>`;
     });
@@ -90,6 +91,25 @@ async function closeContext(context) {
   }
 }
 
+function getErrorResult(task) {
+  if (task === 'conformance') {
+    return '{"result":false}';
+  } else if (task === 'performance') {
+    return '{"first":"NA","average":"NA","best":"NA"}';
+  }
+}
+
+function removeSlowEps(eps) {
+  if (util.gpuVendorId === '8086') {
+    let configLen = eps.length;
+    for (let i = configLen - 1; i >= 0; i--) {
+      if (eps[i].startsWith('webnn')) {
+        eps.splice(i, 1);
+      }
+    }
+  }
+}
+
 async function runBenchmark(task) {
   // get benchmarks
   let benchmarks = [];
@@ -97,7 +117,7 @@ async function runBenchmark(task) {
     path.join(path.resolve(__dirname), util.args['benchmark-json']);
   let taskConfigs = JSON.parse(fs.readFileSync(benchmarkJson));
 
-  for (let modelName in taskConfigs) {
+  for (let modelName of taskConfigs) {
     let config = {};
     if ('model-name' in util.args) {
       config['modelName'] =
@@ -113,8 +133,12 @@ async function runBenchmark(task) {
       if ('conformance-ep' in util.args) {
         config['ep'] = util.args['conformance-ep'].split(',');
       } else {
-        // eps in json file are ignored for conformance
-        config['ep'] = ['webgpu', 'webnn'];
+        config['ep'] = util.allEps;
+        let index = config['ep'].indexOf('wasm');
+        if (index >= 0) {
+          config['ep'].splice(index, 1);
+        }
+        removeSlowEps(config['ep']);
       }
       for (let ep of config['ep']) {
         if (util.conformanceEps.indexOf(ep) < 0) {
@@ -125,13 +149,8 @@ async function runBenchmark(task) {
       if ('performance-ep' in util.args) {
         config['ep'] = util.args['performance-ep'].split(',');
       } else {
-        config['ep'] = taskConfigs[modelName];
-        if (util.hostname !== 'shwdeweb1303' && util.hostname !== 'shwde6666' && util.hostname !== 'shwde9106') {
-          let index = config['ep'].indexOf('webnn');
-          if (index >= 0) {
-            config['ep'].splice(index, 1);
-          }
-        }
+        config['ep'] = util.allEps;
+        removeSlowEps(config['ep']);
       }
       for (let ep of config['ep']) {
         if (util.performanceEps.indexOf(ep) < 0) {
@@ -153,7 +172,7 @@ async function runBenchmark(task) {
   let benchmarksLength = benchmarks.length;
   let previousModelName = '';
 
-  // format: testName, first_webgpu, average_webgpu, best_webgpu, first_wasm, average_wasm, best_wasm, first_webnn, average_webnn, best_webnn
+  // format: testName, (first, average, best) * (webgpu, wasm, webnn-gpu, webnn-cpu)
   let results = [];
   let defaultValue = 'NA';
   let epsLength = util.allEps.length;
@@ -170,7 +189,7 @@ async function runBenchmark(task) {
   let context;
   let page;
 
-  if (!('new-context' in util.args)) {
+  if ('disable-new-context' in util.args) {
     [context, page] = await startContext();
   }
 
@@ -183,7 +202,7 @@ async function runBenchmark(task) {
 
     util.log(`[${i + 1}/${benchmarksLength}] ${benchmark}`);
 
-    if ('new-context' in util.args) {
+    if (!('disable-new-context' in util.args)) {
       let traceFile = undefined;
       if ('trace' in util.args) {
         traceFile = `${util.timestampDir}/${benchmark.join('-').replace(/ /g, '_')}-trace.json`;
@@ -226,9 +245,14 @@ async function runBenchmark(task) {
       // get url
       let url =
         `${util.toolkitUrl}?tasks=${task}`;
+
       for (let index = 0; index < util.parameters.length; index++) {
         if (benchmarks[i][index]) {
-          url += `&${util.parameters[index]}=${benchmarks[i][index]}`;
+          if (util.parameters[index] === 'ep' && benchmarks[i][index].startsWith('webnn')) {
+            url += `&${util.parameters[index]}=webnn&device=${benchmarks[i][index].replace('webnn-', '')}`;
+          } else {
+            url += `&${util.parameters[index]}=${benchmarks[i][index]}`;
+          }
         }
       }
       url += `&${util.toolkitUrlArgs}`;
@@ -266,15 +290,28 @@ async function runBenchmark(task) {
         if (!('crossOriginIsolated' in util)) {
           util['crossOriginIsolated'] = await page.evaluate(() => crossOriginIsolated);
         }
-        await page.waitForSelector('#result', { timeout: util.timeout });
+
+        const retryTimes = util.timeout / 1000;
+        let retryTimesLeft = retryTimes;
+        while (retryTimesLeft > 0) {
+          await page.waitForSelector('#result', { timeout: 1000 }).then(() => {
+            retryTimesLeft = 0;
+          }).catch(e => {
+            retryTimesLeft--;
+            if (retryTimesLeft === 0) {
+              throw new Error('Timeout to get the result');
+            }
+          });
+          if (util.hasError) {
+            testResult = getErrorResult(task);
+            util.hasError = false;
+            throw new Error(util.errorMsg);
+          }
+        }
         testResult = await page.$eval('#result', el => el.textContent);
       } catch (error) {
-        console.log('Could not get result');
-        if (task === 'conformance') {
-          testResult = '{"result":false}';
-        } else if (task === 'performance') {
-          testResult = '{"first":"NA","average":"NA","best":"NA"}';
-        }
+        console.log(error);
+        testResult = getErrorResult(task);
       }
 
       // handle errorMsg
@@ -293,14 +330,10 @@ async function runBenchmark(task) {
         });
       }
 
-      // quit with error
+      // handle error
       if (util.hasError) {
-        if (task === 'conformance') {
-          results[results.length - 1][epIndex * resultMetricsLength + 1] =
-            'false';
-        }
+        testResult = getErrorResult(task);
         util.hasError = false;
-        //continue;
       }
 
       // handle result
@@ -314,12 +347,12 @@ async function runBenchmark(task) {
 
     util.log(result);
 
-    if ('new-context' in util.args) {
+    if (!('disable-new-context' in util.args)) {
       await closeContext(context);
     }
   }
 
-  if (!('new-context' in util.args)) {
+  if ('disable-new-context' in util.args) {
     await closeContext(context);
   }
 

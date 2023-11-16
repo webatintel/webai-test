@@ -65,7 +65,7 @@ util.args =
       type: 'boolean',
       describe: 'kill chrome before testing',
     })
-    .option('new-context', {
+    .option('disable-new-context', {
       type: 'boolean',
       describe: 'start a new context for each test',
     })
@@ -149,7 +149,7 @@ util.args =
         'node $0 --browser-args="--enable-dawn-features=disable_workgroup_init --no-sandbox --enable-zero-copy"'
       ],
       [
-        'node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --server-info --new-context'
+        'node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --server-info --disable-new-context'
       ],
       [
         'node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --timestamp day'
@@ -286,7 +286,6 @@ async function main() {
   }
   if ('trace' in util.args) {
     util.breakdown = false;
-    util.args['new-context'] = true;
     util.toolkitUrlArgs += '&trace=true';
     util.browserArgs +=
       ' --enable-dawn-features=record_detailed_timing_in_trace_events,disable_timestamp_query_conversion --trace-startup-format=json --enable-tracing=disabled-by-default-gpu.dawn'

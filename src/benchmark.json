@@ -1,131 +1,28 @@
-{
-  "albert-base-v2": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "bart-large-cnn-encoder": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "bert-base-cased": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "bert-base-uncased": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "clip-vit-base-patch16": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "densenet-9": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "detr-resnet-50": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "dino-vitb16": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "distilbert-base-uncased": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "distilgpt2": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "efficientnet-lite4-11": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "emotion-ferplus-8": [
-    "webgpu",
-    "wasm"
-  ],
-  "gpt2": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "m2m100-encoder": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "mobilenetv2-12": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "resnet50-v2-7": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "sam-b-decoder": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "sam-b-encoder": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "sd-vae-decoder": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "sd-vae-decoder-f16": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "sd-vae-encoder": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "t5-small-decoder": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "t5-small-encoder": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "tinyyolov2-8": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "whisper-tiny-decoder": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ],
-  "whisper-tiny-encoder": [
-    "webgpu",
-    "wasm",
-    "webnn"
-  ]
-}
+[
+  "albert-base-v2",
+  "bart-large-cnn-encoder",
+  "bert-base-cased",
+  "bert-base-uncased",
+  "clip-vit-base-patch16",
+  "densenet-9",
+  "detr-resnet-50",
+  "dino-vitb16",
+  "distilbert-base-uncased",
+  "distilgpt2",
+  "efficientnet-lite4-11",
+  "emotion-ferplus-8",
+  "gpt2",
+  "m2m100-encoder",
+  "mobilenetv2-12",
+  "resnet50-v2-7",
+  "sam-b-decoder",
+  "sam-b-encoder",
+  "sd-vae-decoder",
+  "sd-vae-decoder-f16",
+  "sd-vae-encoder",
+  "t5-small-decoder",
+  "t5-small-encoder",
+  "tinyyolov2-8",
+  "whisper-tiny-decoder",
+  "whisper-tiny-encoder"
+]
