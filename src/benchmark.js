@@ -138,7 +138,7 @@ async function runBenchmark(task) {
         if (index >= 0) {
           config['ep'].splice(index, 1);
         }
-        removeSlowEps(config['ep']);
+        //removeSlowEps(config['ep']);
       }
       for (let ep of config['ep']) {
         if (util.conformanceEps.indexOf(ep) < 0) {
@@ -150,7 +150,7 @@ async function runBenchmark(task) {
         config['ep'] = util.args['performance-ep'].split(',');
       } else {
         config['ep'] = structuredClone(util.allEps);
-        removeSlowEps(config['ep']);
+        //removeSlowEps(config['ep']);
       }
       for (let ep of config['ep']) {
         if (util.performanceEps.indexOf(ep) < 0) {
