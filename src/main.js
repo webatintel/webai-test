@@ -328,7 +328,7 @@ async function main() {
   }
 
   const cpuData = await si.cpu();
-  util.wasmThreads = Number(cpuData.physicalCores) / 2;
+  util.cpuThreads = Number(cpuData.physicalCores) / 2;
 
   let results = {};
   util.duration = '';

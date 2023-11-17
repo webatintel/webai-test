@@ -226,7 +226,7 @@ async function report(results) {
   for (let category
     of ['browserArgs', 'browserPath', 'chromeVersion', 'cpuName', 'crossOriginIsolated', 'duration', 'gpuDeviceId', 'gpuVendorId',
       'gpuDriverVersion', 'gpuName', 'hostname', 'osVersion', 'platform', 'runTimes',
-      'toolkitUrl', 'toolkitUrlArgs', 'warmupTimes', 'wasmThreads']) {
+      'toolkitUrl', 'toolkitUrlArgs', 'warmupTimes', 'cpuThreads']) {
     let categoryFixup;
     if (category === 'duration') {
       categoryFixup = `${category} (s)`;

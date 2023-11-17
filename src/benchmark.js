@@ -249,7 +249,11 @@ async function runBenchmark(task) {
       for (let index = 0; index < util.parameters.length; index++) {
         if (benchmarks[i][index]) {
           if (util.parameters[index] === 'ep' && benchmarks[i][index].startsWith('webnn')) {
-            url += `&${util.parameters[index]}=webnn&device=${benchmarks[i][index].replace('webnn-', '')}`;
+            let deviceType = benchmarks[i][index].replace('webnn-', '');
+            url += `&${util.parameters[index]}=webnn&deviceType=${deviceType}`;
+            if (deviceType === 'cpu') {
+              url += `&webnnNumThreads=${util['cpuThreads']}`;
+            }
           } else {
             url += `&${util.parameters[index]}=${benchmarks[i][index]}`;
           }
@@ -275,9 +279,7 @@ async function runBenchmark(task) {
         url += `&warmupTimes=${warmupTimes}&runTimes=${runTimes}`;
       }
 
-      if (ep === 'wasm') {
-        url += `&wasmThreads=${util['wasmThreads']}`;
-      }
+      url += `&wasmThreads=${util['cpuThreads']}`;
 
       if (util.updateModelNames.indexOf(modelName) >= 0) {
         url += '&updateModel=true';
