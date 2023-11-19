@@ -362,24 +362,9 @@ async function runBenchmark(task) {
   }
 
   if (task === 'performance') {
-    let fileName = `${util.timestamp.substring(0, 8)}.json`;
-    let file = path.join(util.timestampDir, fileName);
+    let file = path.join(util.timestampDir, `${util.timestamp.substring(0, 8)}.json`);
     fs.writeFileSync(file, JSON.stringify(results));
-    if ('upload' in util.args) {
-      // Ensure server has the device folder
-      let serverFolder = `/workspace/project/work/ort/perf/${util.platform}/${util['gpuDeviceId']}`;
-      let result = spawnSync(util.ssh(`ls ${serverFolder}`), { shell: true });
-      if (result.status != 0) {
-        spawnSync(util.ssh(`mkdir -p ${serverFolder}`), { shell: true });
-      }
-
-      result = spawnSync(util.scp(file, `${util.server}:${serverFolder}`), { shell: true });
-      if (result.status !== 0) {
-        util.log('[ERROR] Failed to upload report');
-      } else {
-        util.log('[INFO] Report was successfully uploaded');
-      }
-    }
+    util.upload(file, '/workspace/project/work/ort/perf');
   }
 
   if ('trace' in util.args) {

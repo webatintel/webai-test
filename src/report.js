@@ -309,8 +309,9 @@ async function report(results) {
 
   let html = style + configTable + unitTable + benchmarkTables + breakdownTable;
 
-  fs.writeFileSync(
-    path.join(util.timestampDir, `${util.timestamp}.html`), html);
+  const file = path.join(util.timestampDir, `${util.timestamp.substring(0, 8)}.html`);
+  fs.writeFileSync(file, html);
+  util.upload(file, '/workspace/reports');
 
   if ('email' in util.args) {
     let subject = '[ORT-TEST] ' + util['hostname'] + ' ' + util.timestamp;

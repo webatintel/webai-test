@@ -330,6 +330,24 @@ async function main() {
   const cpuData = await si.cpu();
   util.cpuThreads = Number(cpuData.physicalCores) / 2;
 
+  util.upload = function (file, serverFolder) {
+    if (!('upload' in util.args)) {
+      return;
+    }
+    serverFolder = `${serverFolder}/${util.platform}/${util['gpuDeviceId']}`;
+    let result = spawnSync(util.ssh(`ls ${serverFolder}`), { shell: true });
+    if (result.status != 0) {
+      spawnSync(util.ssh(`mkdir -p ${serverFolder}`), { shell: true });
+    }
+
+    result = spawnSync(util.scp(file, `${util.server}:${serverFolder}`), { shell: true });
+    if (result.status !== 0) {
+      util.log('[ERROR] Failed to upload file');
+    } else {
+      util.log(`[INFO] File was successfully uploaded to ${serverFolder}`);
+    }
+  }
+
   let results = {};
   util.duration = '';
   let startTime;

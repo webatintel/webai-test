@@ -66,12 +66,12 @@ function log(info) {
   fs.appendFileSync(this.logFile, String(info) + '\n');
 }
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 function scp(src, dest) {
   return `scp ${remoteCmdArgs} ${src} ${dest}`;
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function ssh(cmd) {
@@ -103,8 +103,8 @@ module.exports = {
   ensureNoFile: ensureNoFile,
   getDuration: getDuration,
   log: log,
-  sleep: sleep,
-  uncapitalize: uncapitalize,
   scp: scp,
+  sleep: sleep,
   ssh: ssh,
+  uncapitalize: uncapitalize,
 };
