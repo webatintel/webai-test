@@ -24,6 +24,7 @@
   "sd15-vae-decoder",
   "sd15-vae-encoder",
   "sd21-vae-decoder-f16",
+  "sd21-vae-encoder",
   "t5-small-decoder",
   "t5-small-encoder",
   "tinyyolov2-8",
