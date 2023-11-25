@@ -259,10 +259,16 @@ async function runBenchmark(task) {
           }
         }
       }
-      url += `&${util.toolkitUrlArgs}&ortUrl=https://wp-27.sh.intel.com/workspace/project/onnxruntime`;
+      if ('ort-url' in util.args) {
+        url += `&${util.toolkitUrlArgs}&ortUrl=https://wp-27.sh.intel.com/workspace/project/${util.args['ort-url']}/onnxruntime`;
+      } else {
+        url += `&${util.toolkitUrlArgs}&ortUrl=https://wp-27.sh.intel.com/workspace/project/onnxruntime`;
+      }
+
       if (ep.startsWith('webnn')) {
         url += '-webnn';
       }
+
       if (task === 'performance') {
         let warmupTimes;
         if ('warmup-times' in util.args) {

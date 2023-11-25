@@ -1,5 +1,0 @@
-{
-  "browserArgs": [
-    ["--enable-dawn-features=fxc_optimizations", 20220606, 20220612]
-  ]
-}

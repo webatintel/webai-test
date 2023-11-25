@@ -100,9 +100,9 @@ util.args =
         'test tasks, split by comma, can be conformance, performance, trace, upload and so on.',
       default: 'conformance,performance',
     })
-    .option('ort-dir', {
+    .option('ort-url', {
       type: 'string',
-      describe: 'ort dir',
+      describe: 'ort url',
     })
     .option('timestamp', {
       type: 'string',
@@ -154,9 +154,6 @@ util.args =
       [
         'node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --timestamp day'
       ],
-      [
-        'node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 3 --timestamp day --trace'
-      ],
       ['node $0 --tasks trace --trace-timestamp 20220601'],
       [
         'node $0 --tasks conformance --conformance-ep webgpu --model-name mobilenetv2-12 --timestamp day --skip-config // single test'
@@ -165,6 +162,9 @@ util.args =
         'node $0 --tasks performance --performance-ep webgpu --model-name mobilenetv2-12 --timestamp day --skip-config // single test'
       ],
       ['node $0 --tasks conformance --timestamp day --benchmark-json benchmark-wip.json --dev-mode'],
+      [
+        'node $0 --tasks performance --performance-ep webgpu --model-name mobilenetv2-12 --trace --ort-url gyagp --dev-mode --timestamp day'
+      ],
     ])
     .help()
     .wrap(180)
@@ -263,9 +263,7 @@ async function main() {
   }
 
   util.browserPath = browserPath;
-  console.log(`Use browser at ${browserPath}`);
   util.userDataDir = userDataDir;
-  console.log(`Use user-data-dir at ${userDataDir}`);
   if ('cleanup-user-data-dir' in util.args) {
     console.log('Cleanup user data dir');
     util.ensureNoDir(userDataDir);
@@ -285,14 +283,9 @@ async function main() {
     util.browserArgs += ' --enable-dawn-features=use_dxc';
   }
   if ('trace' in util.args) {
-    util.breakdown = false;
     util.toolkitUrlArgs += '&trace=true';
     util.browserArgs +=
       ' --enable-dawn-features=record_detailed_timing_in_trace_events,disable_timestamp_query_conversion --trace-startup-format=json --enable-tracing=disabled-by-default-gpu.dawn'
-  }
-
-  if ('disable-breakdown' in util.args) {
-    util.breakdown = false;
   }
 
   util.toolkitUrl = 'https://wp-27.sh.intel.com/workspace/project/';
@@ -301,10 +294,10 @@ async function main() {
   }
   util.toolkitUrl += 'ort-toolkit'
 
-  util.toolkitUrlArgs += 'modelUrl=server'
+  util.toolkitUrlArgs += '&modelUrl=server'
 
   if ('toolkit-url-args' in util.args) {
-    util.toolkitUrlArgs += `&${util.args['toolkit-url-args']}`;
+    util.toolkitUrlArgs += `${util.args['toolkit-url-args']}`;
   }
 
   if ('dryrun' in util.args) {
@@ -351,33 +344,32 @@ async function main() {
   let results = {};
   util.duration = '';
   let startTime;
+
+  for (let task of tasks) {
+    if (['conformance', 'performance'].indexOf(task) >= 0) {
+      console.log(`Use browser at ${util.browserPath}`);
+      console.log(`Use user-data-dir at ${util.userDataDir}`);
+      break;
+    }
+  }
+
   for (let i = 0; i < util.args['repeat']; i++) {
-    if (!('trace-timestamp' in util.args)) {
+    // ensure logFile
+    if ('trace-timestamp' in util.args) {
+      util.timestamp = util.args['trace-timestamp'];
+    } else {
       util.timestamp = getTimestamp(util.args['timestamp']);
-      util.timestampDir = path.join(util.outDir, util.timestamp);
-      util.ensureDir(util.timestampDir);
-      util.logFile = path.join(util.timestampDir, `${util.timestamp}.log`);
-      if (fs.existsSync(util.logFile)) {
-        fs.truncateSync(util.logFile, 0);
-      }
-
-      // trial
-      let trialJson = path.join(path.resolve(__dirname), 'trial.json');
-      let trials = JSON.parse(fs.readFileSync(trialJson));
-      let dateInt = parseInt(util.timestamp.substring(0, 8));
-
-      for (let trial of trials['browserArgs']) {
-        if (dateInt >= trial[1] && dateInt <= trial[2]) {
-          console.log(`Trial "${trial[0]}" was added into browserArgs`);
-          util.browserArgs += ` ${trial[0]}`;
-        }
-      }
+    }
+    util.timestampDir = path.join(util.outDir, util.timestamp);
+    util.ensureDir(util.timestampDir);
+    util.logFile = path.join(util.timestampDir, `${util.timestamp}.log`);
+    if (fs.existsSync(util.logFile)) {
+      fs.truncateSync(util.logFile, 0);
     }
 
     if (util.args['repeat'] > 1) {
       util.log(`== Test round ${i + 1}/${util.args['repeat']} ==`);
     }
-
     for (let task of tasks) {
       startTime = new Date();
       util.log(`=${task}=`);

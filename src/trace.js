@@ -1,6 +1,8 @@
 const fs = require('fs');
 const util = require('./util');
 
+let cpuBase, cpuFreq, gpuBase, gpuFreq, timeShift, timelineStack, timelineJson;
+
 function parseTrace() {
   let traceTimestamp;
   if ('trace-timestamp' in util.args) {
@@ -13,10 +15,10 @@ function parseTrace() {
 
   let traceDate = traceTimestamp.substring(0, 8);
   let results = JSON.parse(fs.readFileSync(`${traceDir}/${traceDate}.json`));
-  let cpuBase, cpuFreq, gpuBase, gpuFreq, timeShift;
   const chromeEventNames = [
     'DeviceBase::APICreateComputePipeline',
     'CreateComputePipelineAsyncTask::Run',
+    'DeviceBase::APICreateComputePipeline',
     'DeviceBase::APICreateShaderModule',
     'Queue::Submit',
   ];
@@ -26,7 +28,8 @@ function parseTrace() {
 
     for (let ep of util.allEps) {
       let traceFile = `${modelName}-${ep}-trace.json`;
-      let timelineJson = [];
+      timelineJson = { 'CPU::ORT': [], 'CPU::CHROME': [], 'GPU::ORT': [] };
+      timelineStack = { 'CPU::ORT': [], 'CPU::CHROME': [], 'GPU::ORT': [] };
       timeShift = 0;
       if (!fs.existsSync(traceFile)) {
         continue;
@@ -53,23 +56,18 @@ function parseTrace() {
 
         if (eventName === 'TimeStamp') {
           let message = event['args']['data']['message'];
-          if (message === 'ORT::predictStart') {
-            timelineJson.push({ 'CPU-ORT': [], 'CPU-CHROME': [], 'GPU': [] });
-          }
-
-          if (message.startsWith('ORT::GPU::')) {
-            for (let item of JSON.parse(message.replace('ORT::GPU::', ''))) {
+          if (message.startsWith('GPU::ORT')) {
+            for (let item of JSON.parse(message.replace('GPU::ORT::', ''))) {
               let query = item['query'];
-              timelineJson[timelineJson.length - 1]['GPU'].push([
+              timelineJson['GPU::ORT'].push([
                 item['name'], getMs('GPU', query[0]), getMs('GPU', query[1])
               ]);
             }
-          } else if (message.startsWith('ORT::')) {
+          } else if (message.startsWith('CPU::ORT')) {
             if (timeShift === 0) {
               timeShift = -getMs('CPU', event['ts']);
             }
-            timelineJson[timelineJson.length - 1]['CPU-ORT'].push(
-              [message, getMs('CPU', event['ts'])]);
+            handleMessage(message, getMs('CPU', event['ts']));
           }
         } else if (chromeEventNames.indexOf(eventName) >= 0) {
           let prefix = '';
@@ -79,26 +77,54 @@ function parseTrace() {
           let startTime = getMs('CPU', event['ts']);
           let endTime =
             parseFloat((startTime + event['dur'] / 1000).toFixed(2));
-          timelineJson[timelineJson.length - 1]['CPU-CHROME'].push(
-            [`${prefix}${eventName}`, startTime, endTime]);
+          timelineJson['CPU::CHROME'].push({ name: `${prefix}${eventName}`, start: startTime, duration: getFloatTime(endTime - startTime) });
         }
       }
 
-      timelineJsonFile = traceFile.replace('-trace', '');
+      const timelineJsonFile = traceFile.replace('-trace', '');
       if (fs.existsSync(timelineJsonFile)) {
         fs.truncateSync(timelineJsonFile, 0);
       }
       fs.writeFileSync(timelineJsonFile, JSON.stringify(timelineJson));
     }
   }
+}
 
-  function getMs(type, tick) {
-    if (type === 'CPU') {
-      return parseFloat(
-        ((tick - cpuBase * 1000000 / cpuFreq) / 1000 + timeShift).toFixed(2));
-    } else {
-      return parseFloat(
-        ((tick - gpuBase) * 1000 / gpuFreq + timeShift).toFixed(2));
+function getFloatTime(time) {
+  return parseFloat(time.toFixed(2));
+}
+
+function getMs(type, tick) {
+  if (type === 'CPU') {
+    return getFloatTime((tick - cpuBase * 1000000 / cpuFreq) / 1000 + timeShift);
+  } else {
+    return getFloatTime((tick - gpuBase) * 1000 / gpuFreq + timeShift);
+  }
+}
+
+function handleMessage(message, timeline) {
+  if (message.startsWith('CPU::ORT')) {
+    if (message.startsWith('CPU::ORT::FUNC_BEGIN')) {
+      const funcName = message.split(' ')[0].replace('CPU::ORT::FUNC_BEGIN::', '');
+      const child = { name: funcName, start: timeline, duration: 0 };
+      if (timelineStack['CPU::ORT'].length > 0) {
+        const top = timelineStack['CPU::ORT'][timelineStack['CPU::ORT'].length - 1];
+        if (!('children' in top)) {
+          top['children'] = [];
+        }
+        top['children'].push(child);
+      }
+      timelineStack['CPU::ORT'].push(child);
+    } else if (message.startsWith('CPU::ORT::FUNC_END')) {
+      const funcName = message.split(' ')[0].replace('CPU::ORT::FUNC_END::', '');
+      const child = timelineStack['CPU::ORT'].pop();
+      child['duration'] = parseFloat((timeline - child['start']).toFixed(2));
+      if (timelineStack['CPU::ORT'].length === 0) {
+        if (!('CPU::ORT' in timelineJson)) {
+          timelineJson['CPU::ORT'] = [];
+        }
+        timelineJson['CPU::ORT'].push(child);
+      }
     }
   }
 }
