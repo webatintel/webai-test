@@ -90,15 +90,15 @@ function parseTrace() {
   }
 }
 
-function getFloatTime(time) {
-  return parseFloat(time.toFixed(2));
+function getFloat(time) {
+  return parseFloat(time).toFixed(2);
 }
 
 function getMs(type, tick) {
   if (type === 'CPU') {
-    return getFloatTime((tick - cpuBase * 1000000 / cpuFreq) / 1000 + timeShift);
+    return getFloat((tick - cpuBase * 1000000 / cpuFreq) / 1000 + timeShift);
   } else {
-    return getFloatTime((tick - gpuBase) * 1000 / gpuFreq + timeShift);
+    return getFloat((tick - gpuBase) * 1000 / gpuFreq + timeShift);
   }
 }
 

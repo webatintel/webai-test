@@ -1,15 +1,155 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>flame-chart-js</title>
-    <link href="main-be09f8ce.css" rel="stylesheet" type="text/css">
-</head>
 <body>
-<div id="root"></div>
-<script type="text/javascript">
-Object.assign(window, {"app":{"version":"3.2.0"}});
-</script>
-<script type="text/javascript" src="main-be09f8ce.js"></script>
+  <h1 align="center">ONNX Runtime Trace</h1>
+  <text>
+    <p>
+      Some parameters are supported in url, and you may use them as '?key0=value0&key1=value1...'. Supported parameters
+      are:
+    </p>
+    <li>file=[relativePath]. Example, file=20231122/mobilenetv2-12-webgpu</li>
+    <li>runs=[index|indexStart-indexEnd]. Example, runs=0, runs=5-7</li>
+  </text>
+  <div id="info"></div>
+  <script src="./timeline.js"></script>
+  <script src="../util/base.js"></script>
+  <script>
+    "use strict";
+
+    const cpuOrt = "CPU::ORT";
+    const cpuChrome = "CPU::CHROME";
+    const gpuOrt = "GPU::ORT";
+    const colors = ["#FFFF00", "#4b7ad7", "#d74c4c", "#d74c9e", "#9e4cd7", "#4c9ed7", "#4cd7a1", "#d7c44c"];
+    const runStarts = [];
+    const flameChartData = { [cpuOrt]: [], [cpuChrome]: [], [gpuOrt]: [] };
+    const markData = [];
+    let startRun, endRun;
+
+    function getColor(index) {
+      return colors[index % colors.length];
+    }
+
+    function getRunIndex(time) {
+      for (let i = 0; i < runStarts.length; i++) {
+        if (time >= runStarts[i] && time < runStarts[i+1]) {
+          return i;
+        }
+      }
+    }
+
+    function setColor(item, colorIndex) {
+      item.color = getColor(colorIndex);
+      if ("children" in item) {
+        for (let child of item["children"]) {
+          setColor(child, colorIndex);
+        }
+      }
+    }
+
+    async function main() {
+      // create canvas
+      const div = document.createElement("div");
+      document.body.append(div);
+      div.align = "center";
+      const canvas = document.createElement("canvas");
+      div.append(canvas);
+      canvas.width = screen.width * 0.9;
+      canvas.height = screen.height;
+
+      // get data
+      const text = await readFileAsync(`../out/${getParamByName("file")}.json`);
+      const data = JSON.parse(text);
+
+      // set runStarts
+      for (let i = 1; i < data[cpuOrt].length; i++) {
+        if (i === 1) {
+          runStarts.push(data[cpuOrt][0].start);
+        } else {
+          runStarts.push(data[cpuOrt][i].start);
+        }
+      }
+      const cpuOrtLastIndex = data[cpuOrt].length - 1;
+      const cpuChromeLastIndex = data[cpuChrome].length - 1;
+      const gpuOrtLastIndex = data[gpuOrt].length - 1;
+      let maxCpuOrt = 0;
+      let maxCpuChrome = 0;
+      let maxGpuOrt = 0;
+      if (cpuOrtLastIndex >= 0) {
+        maxCpuOrt = getFloat(data[cpuOrt][cpuOrtLastIndex].start + data[cpuOrt][cpuOrtLastIndex].duration);
+      }
+      if (cpuChromeLastIndex >= 0) {
+        maxCpuChrome = getFloat(
+          data[cpuChrome][cpuChromeLastIndex].start + data[cpuChrome][cpuChromeLastIndex].duration
+        );
+      }
+      if (gpuOrtLastIndex >= 0) {
+        maxGpuOrt = getFloat(data[gpuOrt][gpuOrtLastIndex].start + data[gpuOrt][gpuOrtLastIndex].duration);
+      }
+      runStarts.push(Math.max(maxCpuOrt, maxCpuChrome, maxGpuOrt));
+
+      // set startRun and endRun
+      const paramRuns = getParamByName("runs");
+      const totalRuns = data[cpuOrt].length - 1;
+      if (paramRuns) {
+        if (paramRuns.includes("-")) {
+          let runArray = paramRuns.split("-");
+          startRun = parseInt(runArray[0]);
+          endRun = Math.min(parseInt(runArray[1]), totalRuns - 1);
+        } else {
+          startRun = endRun = parseInt(paramRuns);
+        }
+      } else {
+        startRun = 0;
+        endRun = totalRuns - 1;
+      }
+
+      // filter data
+      for (let category in data) {
+        for (let item of data[category]) {
+          const _startTime = item.start;
+          const runIndex = getRunIndex(item.start);
+          if (runIndex >= startRun && runIndex <= endRun) {
+            flameChartData[category].push(item);
+            setColor(item, runIndex);
+          }
+        }
+      }
+
+      // markData
+      let currentRun = startRun;
+      for (let inference of flameChartData[cpuOrt]) {
+        if (!inference["name"].includes("InferenceSession.run")) {
+          continue;
+        }
+        let color = getColor(currentRun);
+        markData.push({
+          shortName: `start inference ${currentRun}`,
+          fullName: `start inference ${currentRun}`,
+          timestamp: inference.start,
+          color: color,
+        });
+        currentRun++;
+      }
+
+      // flameChart
+      const plugins = [];
+      plugins.push(new TimeGridPlugin());
+      plugins.push(new MarksPlugin({ data: markData }));
+      for (let name of [cpuOrt, cpuChrome, gpuOrt]) {
+        plugins.push(new TogglePlugin(name));
+        const plugin = new FlameChartPlugin({
+          data: flameChartData[name],
+          name: name,
+        });
+        plugins.push(plugin);
+      }
+      const flameChart = new FlameChartContainer({
+        canvas,
+        plugins: plugins,
+      });
+
+      // set zoom
+      flameChart.setZoom(runStarts[startRun], runStarts[endRun + 1]);
+    }
+
+    main();
+  </script>
 </body>
-</html>
