@@ -311,7 +311,7 @@ async function report(results) {
 
   const file = path.join(util.timestampDir, `${util.timestamp.substring(0, 8)}.html`);
   fs.writeFileSync(file, html);
-  util.upload(file, '/workspace/reports');
+  util.upload(file, '/workspace/reports/ort');
 
   if ('email' in util.args) {
     let subject = '[ORT-TEST] ' + util['hostname'] + ' ' + util.timestamp;
