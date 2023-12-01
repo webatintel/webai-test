@@ -269,6 +269,11 @@ async function runBenchmark(task) {
         url += '-webnn';
       }
 
+      // update model
+      if (['distilgpt2', 'gpt2-decoder', 't5-small-decoder'].indexOf(modelName)) {
+        url += '&updateModel=true'
+      }
+
       if (task === 'performance') {
         let warmupTimes;
         if ('warmup-times' in util.args) {
