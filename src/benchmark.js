@@ -358,13 +358,20 @@ async function runBenchmark(task) {
 
     util.log(result);
 
-    if (!('disable-new-context' in util.args)) {
-      await closeContext(context);
+    try {
+      if (!('disable-new-context' in util.args)) {
+        await closeContext(context);
+      }
+    } catch (error) {
     }
   }
 
-  if ('disable-new-context' in util.args) {
-    await closeContext(context);
+  try {
+    if ('disable-new-context' in util.args) {
+      await closeContext(context);
+    }
+  }
+  catch (error) {
   }
 
   if (task === 'performance') {
