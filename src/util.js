@@ -92,7 +92,7 @@ module.exports = {
   platform: platform,
   taskMetrics: taskMetrics,
   timeout: 180 * 1000,
-  toolkitUrl: '',
+  toolkitUrl: 'modelUrl=server',
   toolkitUrlArgs: '',
   unitEps: [],
   updateModelNames: [],

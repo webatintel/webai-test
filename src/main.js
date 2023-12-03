@@ -282,6 +282,7 @@ async function main() {
   if ('use-dxc' in util.args) {
     util.browserArgs += ' --enable-dawn-features=use_dxc';
   }
+
   if ('trace' in util.args) {
     util.toolkitUrlArgs += '&trace=true';
     util.browserArgs +=
@@ -294,10 +295,8 @@ async function main() {
   }
   util.toolkitUrl += 'ort-toolkit'
 
-  util.toolkitUrlArgs += '&modelUrl=server'
-
   if ('toolkit-url-args' in util.args) {
-    util.toolkitUrlArgs += `${util.args['toolkit-url-args']}`;
+    util.toolkitUrlArgs += `&${util.args['toolkit-url-args']}`;
   }
 
   if ('dryrun' in util.args) {

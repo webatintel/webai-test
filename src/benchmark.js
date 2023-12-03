@@ -259,19 +259,20 @@ async function runBenchmark(task) {
           }
         }
       }
-      if ('ort-url' in util.args) {
-        url += `&${util.toolkitUrlArgs}&ortUrl=https://wp-27.sh.intel.com/workspace/project/${util.args['ort-url']}/onnxruntime`;
-      } else {
-        url += `&${util.toolkitUrlArgs}&ortUrl=https://wp-27.sh.intel.com/workspace/project/onnxruntime`;
+      if (util.toolkitUrlArgs) {
+        url += `&${util.toolkitUrlArgs}`;
       }
-
+      if ('ort-url' in util.args) {
+        url += `&ortUrl=https://wp-27.sh.intel.com/workspace/project/${util.args['ort-url']}/onnxruntime`;
+      } else {
+        url += `&ortUrl=https://wp-27.sh.intel.com/workspace/project/onnxruntime`;
+      }
       if (ep.startsWith('webnn')) {
         url += '-webnn';
       }
-
       // update model
-      if (['distilgpt2', 'gpt2-decoder', 't5-small-decoder'].indexOf(modelName)) {
-        url += '&updateModel=true'
+      if (['distilgpt2', 'gpt2-decoder', 't5-small-decoder'].indexOf(modelName) >= 0) {
+        url += '&updateModel=true';
       }
 
       if (task === 'performance') {
