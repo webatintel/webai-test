@@ -83,7 +83,7 @@ module.exports = {
   conformanceEps: [],
   breakdown: false,
   browserArgs:
-    '--enable-features=WebAssemblyThreads,SharedArrayBuffer,WebAssemblySimd,MediaFoundationD3D11VideoCapture --start-maximized --enable-dawn-features=allow_unsafe_apis,use_dxc --enable-webgpu-developer-features --enable-features=MachineLearningNeuralNetworkService --enable-experimental-web-platform-features',
+    '--enable-features=WebAssemblyThreads,SharedArrayBuffer,WebAssemblySimd,MediaFoundationD3D11VideoCapture --start-maximized --enable-dawn-features=allow_unsafe_apis,use_dxc --enable-webgpu-developer-features --enable-features=MachineLearningNeuralNetworkService --enable-experimental-web-platform-features --disable-gpu-sandbox',
   hostname: os.hostname(),
   server: server,
   outDir: outDir,
