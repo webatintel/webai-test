@@ -133,11 +133,7 @@ async function runBenchmark(task) {
       if ('conformance-ep' in util.args) {
         config['ep'] = util.args['conformance-ep'].split(',');
       } else {
-        config['ep'] = structuredClone(util.allEps);
-        let index = config['ep'].indexOf('wasm');
-        if (index >= 0) {
-          config['ep'].splice(index, 1);
-        }
+        config['ep'] = structuredClone(util.allEps.filter(item => ['wasm', 'webgpu-fdo'].indexOf(item) < 0));
         //removeSlowEps(config['ep']);
       }
       for (let ep of config['ep']) {
@@ -172,7 +168,7 @@ async function runBenchmark(task) {
   let benchmarksLength = benchmarks.length;
   let previousModelName = '';
 
-  // format: testName, (first, average, best) * (webgpu, wasm, webnn-gpu, webnn-cpu)
+  // format: testName, (first, average, best) * (webgpu, wasm, webnn-gpu, webnn-cpu, webgpu-fdo)
   let results = [];
   let defaultValue = 'NA';
   let epsLength = util.allEps.length;
@@ -254,6 +250,8 @@ async function runBenchmark(task) {
             if (deviceType === 'cpu') {
               url += `&webnnNumThreads=${util['cpuThreads']}`;
             }
+          } else if (util.parameters[index] === 'ep' && benchmarks[i][index] === 'webgpu-fdo') {
+            url += `&${util.parameters[index]}=webgpu&enableFreeDimensionOverrides=true`;
           } else {
             url += `&${util.parameters[index]}=${benchmarks[i][index]}`;
           }
