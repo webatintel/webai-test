@@ -269,7 +269,7 @@ async function runBenchmark(task) {
         url += '-webnn';
       }
       // update model
-      if (['distilgpt2', 'gpt2-decoder', 't5-small-decoder'].indexOf(modelName) >= 0) {
+      if ([].indexOf(modelName) >= 0) {
         url += '&updateModel=true';
       }
 
