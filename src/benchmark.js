@@ -37,14 +37,14 @@ function intersect(a, b) {
 }
 
 async function startContext(traceFile = undefined) {
-  let extraBrowserArgs = '';
+  let extraBrowserArgs = [];
   if ('trace' in util.args) {
-    extraBrowserArgs = `--trace-startup-file=${traceFile}`;
+    extraBrowserArgs.push(`--trace-startup-file=${traceFile}`);
   }
 
   if (!util.dryrun) {
     let context = await puppeteer.launch({
-      args: util['browserArgs'].split(' ').concat(extraBrowserArgs.split(' ')),
+      args: util['browserArgs'].concat(extraBrowserArgs),
       defaultViewport: null,
       executablePath: util['browserPath'],
       headless: false,
@@ -258,7 +258,7 @@ async function runBenchmark(task) {
         }
       }
       if (util.toolkitUrlArgs) {
-        url += `&${util.toolkitUrlArgs}`;
+        url += `&${util.toolkitUrlArgs.join('&')}`;
       }
       if ('ort-url' in util.args) {
         url += `&ortUrl=https://wp-27.sh.intel.com/workspace/project/${util.args['ort-url']}/onnxruntime`;

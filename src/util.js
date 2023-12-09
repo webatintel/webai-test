@@ -4,11 +4,18 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-let browserArgs = '--enable-features=SharedArrayBuffer --start-maximized';
+let browserArgs = ['--enable-features=SharedArrayBuffer', '--start-maximized'];
 // webgpu
-browserArgs += ' --enable-webgpu-developer-features --enable-dawn-features=use_dxc';
+browserArgs.push(...[
+  '--enable-webgpu-developer-features',
+  '--enable-dawn-features=use_dxc',
+]);
 // webnn
-browserArgs += ' --enable-features=MachineLearningNeuralNetworkService --enable-experimental-web-platform-features --disable-gpu-sandbox';
+browserArgs.push(...[
+  '--enable-features=MachineLearningNeuralNetworkService',
+  '--enable-experimental-web-platform-features',
+  '--disable-gpu-sandbox',
+]);
 
 let parameters = [
   'modelName',
@@ -98,7 +105,7 @@ module.exports = {
   taskMetrics: taskMetrics,
   timeout: 180 * 1000,
   toolkitUrl: 'modelUrl=server',
-  toolkitUrlArgs: '',
+  toolkitUrlArgs: [],
   unitEps: [],
   updateModelNames: [],
 

@@ -17,29 +17,82 @@
     const cpuOrt = "CPU::ORT";
     const cpuChrome = "CPU::CHROME";
     const gpuOrt = "GPU::ORT";
-    const colors = ["#FFFF00", "#4b7ad7", "#d74c4c", "#d74c9e", "#9e4cd7", "#4c9ed7", "#4cd7a1", "#d7c44c"];
+    const batchCount = 16;
+    let indexInBatch = 0;
+    // ["#FFFF00", "#4b7ad7", "#d74c4c", "#d74c9e", "#9e4cd7", "#4c9ed7", "#4cd7a1", "#d7c44c"]
+    const colors = genColors("FF0000", "00FF00", batchCount);
     const runStarts = [];
-    const flameChartData = { [cpuOrt]: [], [cpuChrome]: [], [gpuOrt]: [] };
+    const flameChartData = { [cpuOrt]: [], [gpuOrt]: [], [cpuChrome]: [] };
     const markData = [];
     let startRun, endRun;
 
-    function getColor(index) {
-      return colors[index % colors.length];
+    function hexToRgb(hex) {
+      hex = hex.toLowerCase();
+      let rgbColors = [];
+      for (let i = 0; i < 6; i += 2) {
+        rgbColors.push(parseInt("0x" + hex.slice(i, i + 2)));
+      }
+      return rgbColors;
+    }
+
+    function genColors(startHex, endHex, count) {
+      let startRgb = hexToRgb(startHex);
+      let startR = startRgb[0];
+      let startG = startRgb[1];
+      let startB = startRgb[2];
+      let endRGB = hexToRgb(endHex);
+      let endR = endRGB[0];
+      let endG = endRGB[1];
+      let endB = endRGB[2];
+      let stepR = (endR - startR) / count;
+      let stepG = (endG - startG) / count;
+      let stepB = (endB - startB) / count;
+
+      let genColor = (r, g, b) => {
+        return "rgb(" + parseInt(r) + "," + parseInt(g) + "," + parseInt(b) + ")";
+      };
+
+      let colors = [];
+      for (let i = 0; i < count; i++) {
+        colors.push(genColor(stepR * i + startR, stepG * i + startG, stepB * i + startB));
+      }
+      return colors;
+
+      // differentiate the colors
+      let newColors = [];
+      let middle = (count + 1) / 2;
+      for (let i = 0; i < (count + 1) / 2; i++) {
+        newColors.push(colors[i]);
+        newColors.push(colors[middle + i]);
+      }
+      return newColors;
     }
 
     function getRunIndex(time) {
       for (let i = 0; i < runStarts.length; i++) {
-        if (time >= runStarts[i] && time < runStarts[i+1]) {
+        if (time >= runStarts[i] && time < runStarts[i + 1]) {
           return i;
         }
       }
     }
 
-    function setColor(item, colorIndex) {
-      item.color = getColor(colorIndex);
+    function setColor(item, force = false) {
+      if (force) {
+        item.color = colors[indexInBatch % colors.length];
+        indexInBatch++;
+      } else {
+        if (item.name.includes("WebGpuBackend.run") || item.name.includes("ProgramManager.run")) {
+          item.color = colors[indexInBatch % colors.length];
+        } else {
+          item.color = "#4b7ad7";
+        }
+        if (item.name.includes("ProgramManager.run")) {
+          indexInBatch++;
+        }
+      }
       if ("children" in item) {
         for (let child of item["children"]) {
-          setColor(child, colorIndex);
+          setColor(child);
         }
       }
     }
@@ -52,7 +105,7 @@
       const canvas = document.createElement("canvas");
       div.append(canvas);
       canvas.width = screen.width * 0.9;
-      canvas.height = screen.height;
+      canvas.height = screen.height * 0.8;
 
       // get data
       const text = await readFileAsync(`../out/${getParamByName("file")}.json`);
@@ -108,7 +161,8 @@
           const runIndex = getRunIndex(item.start);
           if (runIndex >= startRun && runIndex <= endRun) {
             flameChartData[category].push(item);
-            setColor(item, runIndex);
+            let force = category === gpuOrt ? true : false;
+            setColor(item, force);
           }
         }
       }
@@ -119,7 +173,7 @@
         if (!inference["name"].includes("InferenceSession.run")) {
           continue;
         }
-        let color = getColor(currentRun);
+        let color = "#FF0000";
         markData.push({
           shortName: `start inference ${currentRun}`,
           fullName: `start inference ${currentRun}`,
@@ -133,7 +187,7 @@
       const plugins = [];
       plugins.push(new TimeGridPlugin());
       plugins.push(new MarksPlugin({ data: markData }));
-      for (let name of [cpuOrt, cpuChrome, gpuOrt]) {
+      for (let name of [cpuOrt, gpuOrt, cpuChrome]) {
         plugins.push(new TogglePlugin(name));
         const plugin = new FlameChartPlugin({
           data: flameChartData[name],

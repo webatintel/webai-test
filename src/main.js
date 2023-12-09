@@ -129,10 +129,6 @@ util.args =
       type: 'boolean',
       describe: 'upload result to server',
     })
-    .option('use-dxc', {
-      type: 'boolean',
-      describe: 'use dxc instead of fxc',
-    })
     .option('warmup-times', {
       type: 'number',
       describe: 'warmup times',
@@ -154,7 +150,7 @@ util.args =
       [
         'node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --timestamp day'
       ],
-      ['node $0 --tasks trace --trace-timestamp 20220601'],
+      ['node $0 --trace --trace-timestamp 20220601'],
       [
         'node $0 --tasks conformance --conformance-ep webgpu --model-name mobilenetv2-12 --timestamp day --skip-config // single test'
       ],
@@ -270,23 +266,26 @@ async function main() {
   }
 
   if (util.platform === 'linux') {
-    util.browserArgs +=
-      ' --enable-unsafe-webgpu --use-angle=vulkan --enable-features=Vulkan';
+    util.browserArgs.push(...[
+      '--enable-unsafe-webgpu',
+      '--use-angle=vulkan',
+      '--enable-features=Vulkan',
+    ]);
   }
   if (util.platform === 'darwin') {
-    util.browserArgs += ' --use-mock-keychain';
+    util.browserArgs.push('--use-mock-keychain');
   }
   if ('browser-args' in util.args) {
-    util.browserArgs = `${util.browserArgs} ${util.args['browser-args']}`;
-  }
-  if ('use-dxc' in util.args) {
-    util.browserArgs += ' --enable-dawn-features=use_dxc';
+    util.browserArgs.push(...util.args['browser-args'].split(' '));
   }
 
   if ('trace' in util.args) {
-    util.toolkitUrlArgs += '&trace=true';
-    util.browserArgs +=
-      ' --enable-dawn-features=record_detailed_timing_in_trace_events,disable_timestamp_query_conversion --trace-startup-format=json --enable-tracing=disabled-by-default-gpu.dawn'
+    util.toolkitUrlArgs.push('enableTrace=true');
+    util.browserArgs.push(...[
+      '--enable-dawn-features=allow_unsafe_apis,use_dxc,disable_robustness,record_detailed_timing_in_trace_events,disable_timestamp_query_conversion',
+      '--trace-startup-format=json',
+      '--enable-tracing=disabled-by-default-gpu.dawn',
+    ]);
   }
 
   util.toolkitUrl = 'https://wp-27.sh.intel.com/workspace/project/';
@@ -296,7 +295,7 @@ async function main() {
   util.toolkitUrl += 'ort-toolkit'
 
   if ('toolkit-url-args' in util.args) {
-    util.toolkitUrlArgs += `&${util.args['toolkit-url-args']}`;
+    util.toolkitUrlArgs.push(...util.args['toolkit-url-args'].split('&'));
   }
 
   if ('dryrun' in util.args) {
