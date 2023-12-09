@@ -1,16 +1,8 @@
 <body>
   <h1 align="center">ONNX Runtime Trace</h1>
-  <text>
-    <p>
-      Some parameters are supported in url, and you may use them as '?key0=value0&key1=value1...'. Supported parameters
-      are:
-    </p>
-    <li>file=[relativePath]. Example, file=20231122/mobilenetv2-12-webgpu</li>
-    <li>runs=[index|indexStart-indexEnd]. Example, runs=0, runs=5-7</li>
-  </text>
   <div id="info"></div>
-  <script src="./timeline.js"></script>
-  <script src="../util/base.js"></script>
+  <script src="timeline.js"></script>
+  <script src="../../util/base.js"></script>
   <script>
     "use strict";
 
@@ -108,7 +100,7 @@
       canvas.height = screen.height * 0.8;
 
       // get data
-      const text = await readFileAsync(`../out/${getParamByName("file")}.json`);
+      const text = await readFileAsync(`../../out/${getParamByName("file")}.json`);
       const data = JSON.parse(text);
 
       // set runStarts
