@@ -17,7 +17,7 @@
   "m2m100-encoder",
   "mobilenetv2-12",
   "mobilenetv2-12-f16",
-  "mobilenetv3",
+  "mobilenetv3-small-100",
   "realesrgan-t256",
   "realesrgan-t256-f16",
   "resnet50-v2-7",
