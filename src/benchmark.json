@@ -17,6 +17,7 @@
   "m2m100-encoder",
   "mobilenetv2-12",
   "mobilenetv2-12-f16",
+  "mobilenetv3",
   "realesrgan-t256",
   "realesrgan-t256-f16",
   "resnet50-v2-7",
@@ -32,5 +33,6 @@
   "t5-small-encoder",
   "tinyyolov2-8",
   "whisper-tiny-decoder",
+  "whisper-tiny-decoder-merged",
   "whisper-tiny-encoder"
 ]
