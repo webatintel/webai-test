@@ -12,8 +12,7 @@ browserArgs.push(...[
 ]);
 // webnn
 browserArgs.push(...[
-  '--enable-features=MachineLearningNeuralNetworkService',
-  '--enable-experimental-web-platform-features',
+  '--enable-features=WebMachineLearningNeuralNetwork',
   '--disable-gpu-sandbox',
 ]);
 
