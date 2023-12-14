@@ -7,16 +7,16 @@
     "use strict";
 
     const cpuOrt = "CPU::ORT";
-    const cpuChrome = "CPU::CHROME";
     const gpuOrt = "GPU::ORT";
-    const batchCount = 16;
+    const cpuChrome = "CPU::CHROME";
     let indexInBatch = 0;
-    // ["#FFFF00", "#4b7ad7", "#d74c4c", "#d74c9e", "#9e4cd7", "#4c9ed7", "#4cd7a1", "#d7c44c"]
-    const colors = genColors("FF0000", "00FF00", batchCount);
+    // good colors: ["#FFFF00", "#4b7ad7", "#d74c4c", "#d74c9e", "#9e4cd7", "#4c9ed7", "#4cd7a1", "#d7c44c"]
+    let colors;
     const runStarts = [];
     const flameChartData = { [cpuOrt]: [], [gpuOrt]: [], [cpuChrome]: [] };
     const markData = [];
     let startRun, endRun;
+    let gpuKernelIndex = 0;
 
     function hexToRgb(hex) {
       hex = hex.toLowerCase();
@@ -68,20 +68,13 @@
       }
     }
 
-    function setColor(item, force = false) {
-      if (force) {
-        item.color = colors[indexInBatch % colors.length];
-        indexInBatch++;
+    function setColor(item) {
+      if ("color" in item) {
+        item.color = colors[item.color];
       } else {
-        if (item.name.includes("WebGpuBackend.run") || item.name.includes("ProgramManager.run")) {
-          item.color = colors[indexInBatch % colors.length];
-        } else {
-          item.color = "#4b7ad7";
-        }
-        if (item.name.includes("ProgramManager.run")) {
-          indexInBatch++;
-        }
+        item.color = "#4b7ad7";
       }
+
       if ("children" in item) {
         for (let child of item["children"]) {
           setColor(child);
@@ -102,6 +95,51 @@
       // get data
       const text = await readFileAsync(`../../out/${getParamByName("file")}.json`);
       const data = JSON.parse(text);
+
+      // get maxDispatchIndex and set color index
+      let maxDispatchIndex = 0;
+      let dispatchIndex = -1;
+      for (let itemSessionRun of data[cpuOrt]) {
+        if (itemSessionRun.name !== "_InferenceSession.run") {
+          continue;
+        }
+
+        // go to OnnxruntimeWebAssemblySessionHandler.run
+        let itemSessionHandlerRun = itemSessionRun;
+        while ("children" in itemSessionHandlerRun) {
+          if (itemSessionHandlerRun.name.startsWith("OnnxruntimeWebAssemblySessionHandler.run")) {
+            break;
+          }
+          itemSessionHandlerRun = itemSessionHandlerRun.children[0];
+        }
+
+        // iterate all the kernels
+        for (let i = 0; i < itemSessionHandlerRun.children.length; i++) {
+          dispatchIndex++;
+          // child can be flush or program
+          let itemSessionHandlerRunChild = itemSessionHandlerRun.children[i];
+          if (itemSessionHandlerRunChild.name === "WebGpuBackend.flush") {
+            if (dispatchIndex > maxDispatchIndex) {
+              maxDispatchIndex = dispatchIndex;
+            }
+            dispatchIndex = -1;
+            continue;
+          }
+          itemSessionHandlerRunChild.color = dispatchIndex;
+          data[gpuOrt][gpuKernelIndex++].color = dispatchIndex;
+
+          for (let child of itemSessionHandlerRunChild.children) {
+            child.color = dispatchIndex;
+            if ("children" in child && child.children[0].name === "WebGpuBackend.flush") {
+              if (dispatchIndex > maxDispatchIndex) {
+                maxDispatchIndex = dispatchIndex;
+              }
+              dispatchIndex = -1;
+            }
+          }
+        }
+      }
+      colors = genColors("FF0000", "00FF00", maxDispatchIndex);
 
       // set runStarts
       for (let i = 1; i < data[cpuOrt].length; i++) {
@@ -153,8 +191,7 @@
           const runIndex = getRunIndex(item.start);
           if (runIndex >= startRun && runIndex <= endRun) {
             flameChartData[category].push(item);
-            let force = category === gpuOrt ? true : false;
-            setColor(item, force);
+            setColor(item);
           }
         }
       }

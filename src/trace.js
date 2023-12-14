@@ -2,7 +2,10 @@ const fs = require("fs");
 const util = require("./util");
 
 let cpuBase, cpuFreq, gpuBase, gpuFreq, baseTime, timelineStack, timelineJson;
-let kernelIndex = 0;
+let cpuKernelIndex = 0;
+let gpuKernelIndex = 0;
+let kernelGroups = [];
+const smallDuration = 0.001;
 
 function parseTrace() {
   let traceTimestamp;
@@ -29,8 +32,8 @@ function parseTrace() {
 
     for (let ep of util.allEps) {
       let traceFile = `${modelName}-${ep}-trace.json`;
-      timelineJson = { "CPU::ORT": [], "CPU::CHROME": [], "GPU::ORT": [] };
-      timelineStack = { "CPU::ORT": [], "CPU::CHROME": [], "GPU::ORT": [] };
+      timelineJson = { "CPU::ORT": [], "GPU::ORT": [], "CPU::CHROME": [] };
+      timelineStack = { "CPU::ORT": [], "GPU::ORT": [], "CPU::CHROME": [] };
       baseTime = 0;
       if (!fs.existsSync(traceFile)) {
         continue;
@@ -58,9 +61,19 @@ function parseTrace() {
           let message = event["args"]["data"]["message"];
           if (message.startsWith("GPU::ORT")) {
             const info = message.replace("GPU::ORT::", "").split('::');
+            if (gpuKernelIndex > kernelGroups[0]) {
+              kernelGroups.shift();
+              gpuKernelIndex = 0;
+            }
+            const name = `${info[0]}::${gpuKernelIndex}`;
+            gpuKernelIndex++;
             const startTime = getMs("GPU", info[1]);
             const endTime = getMs("GPU", info[2]);
-            timelineJson["GPU::ORT"].push({ name: info[0], start: startTime, duration: getFloat(endTime - startTime) });
+            let duration = getFloat(endTime - startTime);
+            if (duration === 0) {
+              duration = smallDuration;
+            }
+            timelineJson["GPU::ORT"].push({ name: name, start: startTime, duration: duration });
           } else if (message.startsWith("CPU::ORT")) {
             if (baseTime === 0) {
               baseTime = getMs("CPU", event["ts"]);
@@ -108,7 +121,7 @@ function handleMessage(message, timeline) {
     if (message.startsWith("CPU::ORT::FUNC_BEGIN")) {
       let funcName = message.split(" ")[0].replace("CPU::ORT::FUNC_BEGIN::", "");
       if (funcName.startsWith('WebGpuBackend.run') || funcName.startsWith('ProgramManager.build') || funcName.startsWith('ProgramManager.run')) {
-        funcName += `::${kernelIndex}`;
+        funcName += `::${cpuKernelIndex}`;
       }
       const child = { name: funcName, start: timeline, duration: 0 };
       if (timelineStack["CPU::ORT"].length > 0) {
@@ -122,9 +135,11 @@ function handleMessage(message, timeline) {
     } else if (message.startsWith("CPU::ORT::FUNC_END")) {
       const funcName = message.split(" ")[0].replace("CPU::ORT::FUNC_END::", "");
       if (funcName.startsWith('WebGpuBackend.run')) {
-        kernelIndex++;
+        kernelGroups[kernelGroups.length - 1] += 1;
+        cpuKernelIndex++;
       } else if (funcName.startsWith('_InferenceSession.run')) {
-        kernelIndex = 0;
+        kernelGroups.push(-1);
+        cpuKernelIndex = 0;
       }
 
       const child = timelineStack["CPU::ORT"].pop();

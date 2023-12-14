@@ -282,7 +282,7 @@ async function main() {
   if ('trace' in util.args) {
     util.toolkitUrlArgs.push('enableTrace=true');
     util.browserArgs.push(...[
-      //'--enable-unsafe-webgpu',
+      '--enable-unsafe-webgpu',
       '--enable-dawn-features=allow_unsafe_apis,use_dxc,record_detailed_timing_in_trace_events,disable_timestamp_query_conversion',
       '--trace-startup-format=json',
       '--enable-tracing=disabled-by-default-gpu.dawn',
