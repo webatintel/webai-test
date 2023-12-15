@@ -153,7 +153,7 @@ util.args = yargs
     ],
     ["node $0 --tasks conformance --timestamp day --benchmark-json benchmark-wip.json --dev-mode"],
     [
-      "node $0 --tasks performance --performance-ep webgpu --model-name mobilenetv2-12 --enable-trace --ort-url gh/20231215 -trace--timestamp day",
+      "node $0 --tasks performance --performance-ep webgpu --model-name mobilenetv2-12 --enable-trace --ort-url gh/20231215-trace --timestamp day",
     ],
   ])
   .help()
