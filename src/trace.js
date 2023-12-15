@@ -60,7 +60,7 @@ function parseTrace() {
         if (eventName === "TimeStamp") {
           let message = event["args"]["data"]["message"];
           if (message.startsWith("GPU::ORT")) {
-            const info = message.replace("GPU::ORT::", "").split('::');
+            const info = message.replace("GPU::ORT::", "").split("::");
             if (gpuKernelIndex > kernelGroups[0]) {
               kernelGroups.shift();
               gpuKernelIndex = 0;
@@ -120,7 +120,11 @@ function handleMessage(message, timeline) {
   if (message.startsWith("CPU::ORT")) {
     if (message.startsWith("CPU::ORT::FUNC_BEGIN")) {
       let funcName = message.split(" ")[0].replace("CPU::ORT::FUNC_BEGIN::", "");
-      if (funcName.startsWith('WebGpuBackend.run') || funcName.startsWith('ProgramManager.build') || funcName.startsWith('ProgramManager.run')) {
+      if (
+        funcName.startsWith("WebGpuBackend.run") ||
+        funcName.startsWith("ProgramManager.build") ||
+        funcName.startsWith("ProgramManager.run")
+      ) {
         funcName += `::${cpuKernelIndex}`;
       }
       const child = { name: funcName, start: timeline, duration: 0 };
@@ -134,10 +138,10 @@ function handleMessage(message, timeline) {
       timelineStack["CPU::ORT"].push(child);
     } else if (message.startsWith("CPU::ORT::FUNC_END")) {
       const funcName = message.split(" ")[0].replace("CPU::ORT::FUNC_END::", "");
-      if (funcName.startsWith('WebGpuBackend.run')) {
+      if (funcName.startsWith("WebGpuBackend.run")) {
         kernelGroups[kernelGroups.length - 1] += 1;
         cpuKernelIndex++;
-      } else if (funcName.startsWith('_InferenceSession.run')) {
+      } else if (funcName.startsWith("_InferenceSession.run")) {
         kernelGroups.push(-1);
         cpuKernelIndex = 0;
       }

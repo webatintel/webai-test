@@ -1,16 +1,16 @@
-'use strict';
+"use strict";
 
-const fs = require('fs');
-const path = require('path');
-const { spawnSync } = require('child_process')
+const fs = require("fs");
+const path = require("path");
+const { spawnSync } = require("child_process");
 
-const util = require('./util.js')
+const util = require("./util.js");
 
-let startDate = '20230101'
-let endDate = '20230105'
+let startDate = "20230101";
+let endDate = "20230105";
 
 async function upload() {
-  if (!util['gpuDeviceId']) {
+  if (!util["gpuDeviceId"]) {
     return;
   }
   let folders = fs.readdirSync(util.outDir);
@@ -28,8 +28,7 @@ async function upload() {
 
     // check if date is in range
     let folderDate = folder.substring(0, 8);
-    if (parseInt(folderDate) < parseInt(startDate) ||
-      parseInt(folderDate) > parseInt(endDate)) {
+    if (parseInt(folderDate) < parseInt(startDate) || parseInt(folderDate) > parseInt(endDate)) {
       continue;
     }
     let fileName = `${folderDate}.json`;
@@ -41,17 +40,15 @@ async function upload() {
     }
 
     // check if file exists in remote
-    let serverFolder = `/workspace/project/work/ort/perf/${util.platform}/${util['gpuDeviceId']}`;
-    result = spawnSync(
-      util.ssh(`ls ${serverFolder}/${fileName}`), { shell: true });
+    let serverFolder = `/workspace/project/work/ort/perf/${util.platform}/${util["gpuDeviceId"]}`;
+    result = spawnSync(util.ssh(`ls ${serverFolder}/${fileName}`), { shell: true });
     if (result.status == 0) {
       util.log(`[INFO] ${fullPath} already exists in server`);
       continue;
     }
 
     // upload the file
-    result =
-      spawnSync(util.scp(fullPath, `${util.server}:${serverFolder}`), { shell: true });
+    result = spawnSync(util.scp(fullPath, `${util.server}:${serverFolder}`), { shell: true });
     if (result.status !== 0) {
       util.log(`[ERROR] ${fullPath} Failed to upload`);
     } else {
