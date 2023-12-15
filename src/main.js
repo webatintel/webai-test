@@ -7,12 +7,13 @@ const path = require("path");
 const si = require("systeminformation");
 const yargs = require("yargs");
 
-const runBenchmark = require("./benchmark.js");
+const benchmark = require("./benchmark.js");
 const config = require("./config.js");
 const report = require("./report.js");
 const parseTrace = require("./trace.js");
 const upload = require("./upload.js");
 const util = require("./util.js");
+const workload = require("./workload.js");
 
 util.args = yargs
   .usage("node $0 [args]")
@@ -68,9 +69,9 @@ util.args = yargs
     type: "boolean",
     describe: "start a new context for each test",
   })
-  .option("pause-test", {
+  .option("pause-task", {
     type: "boolean",
-    describe: "pause after each performance test",
+    describe: "pause task",
   })
   .option("performance-ep", {
     type: "string",
@@ -95,7 +96,7 @@ util.args = yargs
   })
   .option("tasks", {
     type: "string",
-    describe: "test tasks, split by comma, can be conformance, performance, trace, upload and so on.",
+    describe: "test tasks, split by comma, can be conformance, performance, trace, upload, workload and so on.",
     default: "conformance,performance",
   })
   .option("ort-url", {
@@ -130,6 +131,15 @@ util.args = yargs
   .option("warmup-times", {
     type: "number",
     describe: "warmup times",
+  })
+  .option("workload-url", {
+    type: "string",
+    describe: "workload url",
+  })
+  .option("workload-timeout", {
+    type: "number",
+    describe: "workload timeout in seconds",
+    default: 10,
   })
   .example([
     ["node $0 --email a@intel.com;b@intel.com // Send report to emails"],
@@ -347,10 +357,12 @@ async function main() {
       util.log(`=${task}=`);
       if (["conformance", "performance"].indexOf(task) >= 0) {
         if (!(task === "performance" && util.warmupTimes === 0 && util.runTimes === 0)) {
-          results[task] = await runBenchmark(task);
+          results[task] = await benchmark(task);
         }
       } else if (task === "trace") {
         await parseTrace();
+      } else if (task === "workload") {
+        workload();
       }
       util.duration += `${task}: ${(new Date() - startTime) / 1000} `;
     }

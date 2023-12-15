@@ -114,7 +114,7 @@ function removeSlowEps(eps) {
   }
 }
 
-async function runBenchmark(task) {
+async function benchmark(task) {
   // get benchmarks
   let benchmarks = [];
   let benchmarkJson = path.join(path.resolve(__dirname), util.args["benchmark-json"]);
@@ -195,11 +195,11 @@ async function runBenchmark(task) {
     let ep = benchmark[benchmark.length - 1];
     let epIndex = util.allEps.indexOf(ep);
     let testResult;
+    let traceFile;
 
     util.log(`[${i + 1}/${benchmarksLength}] ${benchmark}`);
 
     if (!("disable-new-context" in util.args)) {
-      let traceFile = undefined;
       if ("enable-trace" in util.args) {
         traceFile = `${util.timestampDir}/${benchmark.join("-").replace(/ /g, "_")}-trace.json`;
       }
@@ -337,7 +337,7 @@ async function runBenchmark(task) {
       errorMsg = "";
 
       // pause if needed
-      if ("pause-test" in util.args) {
+      if ("pause-task" in util.args) {
         const readlineInterface = readline.createInterface({ input: process.stdin, output: process.stdout });
         await new Promise((resolve) => {
           readlineInterface.question("Press Enter to continue...\n", resolve);
@@ -367,6 +367,10 @@ async function runBenchmark(task) {
         await closeContext(context);
       }
     } catch (error) { }
+
+    if ("enable-trace" in util.args) {
+      await parseTrace(traceFile);
+    }
   }
 
   try {
@@ -381,11 +385,7 @@ async function runBenchmark(task) {
     util.upload(file, "/workspace/project/work/ort/perf");
   }
 
-  if ("enable-trace" in util.args) {
-    await parseTrace();
-  }
-
   return Promise.resolve(results);
 }
 
-module.exports = runBenchmark;
+module.exports = benchmark;

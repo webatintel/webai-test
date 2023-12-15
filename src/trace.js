@@ -7,7 +7,7 @@ let gpuKernelIndex = 0;
 let kernelGroups = [];
 const smallDuration = 0.001;
 
-function parseTrace() {
+function parseTrace(traceFile) {
   let traceTimestamp;
   if ("trace-timestamp" in util.args) {
     traceTimestamp = util.args["trace-timestamp"];
@@ -17,8 +17,6 @@ function parseTrace() {
   let traceDir = `${util.outDir}/${traceTimestamp}`;
   process.chdir(traceDir);
 
-  let traceDate = traceTimestamp.substring(0, 8);
-  let results = JSON.parse(fs.readFileSync(`${traceDir}/${traceDate}.json`));
   const chromeEventNames = [
     "DeviceBase::APICreateComputePipeline",
     "CreateComputePipelineAsyncTask::Run",
@@ -27,81 +25,70 @@ function parseTrace() {
     "Queue::Submit",
   ];
 
-  for (let result of results) {
-    let modelName = result[0];
+  timelineJson = { "CPU::ORT": [], "GPU::ORT": [], "CPU::CHROME": [] };
+  timelineStack = { "CPU::ORT": [], "GPU::ORT": [], "CPU::CHROME": [] };
+  baseTime = 0;
 
-    for (let ep of util.allEps) {
-      let traceFile = `${modelName}-${ep}-trace.json`;
-      timelineJson = { "CPU::ORT": [], "GPU::ORT": [], "CPU::CHROME": [] };
-      timelineStack = { "CPU::ORT": [], "GPU::ORT": [], "CPU::CHROME": [] };
-      baseTime = 0;
-      if (!fs.existsSync(traceFile)) {
-        continue;
-      }
+  let traceJson = JSON.parse(fs.readFileSync(traceFile));
+  for (let event of traceJson["traceEvents"]) {
+    let eventName = event["name"];
+    if (eventName != "d3d12::CommandRecordingContext::ExecuteCommandList Detailed Timing") {
+      continue;
+    }
+    let splitRawTime = event["args"]["Timing"].split(",");
+    cpuBase = splitRawTime[2].split(":")[1];
+    gpuBase = splitRawTime[3].split(":")[1];
+    cpuFreq = splitRawTime[4].split(":")[1];
+    gpuFreq = splitRawTime[5].split(":")[1];
+    break;
+  }
 
-      let traceJson = JSON.parse(fs.readFileSync(traceFile));
+  for (let event of traceJson["traceEvents"]) {
+    let eventName = event["name"];
 
-      for (let event of traceJson["traceEvents"]) {
-        let eventName = event["name"];
-        if (eventName != "d3d12::CommandRecordingContext::ExecuteCommandList Detailed Timing") {
-          continue;
+    if (eventName === "TimeStamp") {
+      let message = event["args"]["data"]["message"];
+      if (message.startsWith("GPU::ORT")) {
+        const info = message.replace("GPU::ORT::", "").split("::");
+        if (gpuKernelIndex > kernelGroups[0]) {
+          kernelGroups.shift();
+          gpuKernelIndex = 0;
         }
-        let splitRawTime = event["args"]["Timing"].split(",");
-        cpuBase = splitRawTime[2].split(":")[1];
-        gpuBase = splitRawTime[3].split(":")[1];
-        cpuFreq = splitRawTime[4].split(":")[1];
-        gpuFreq = splitRawTime[5].split(":")[1];
-        break;
-      }
-
-      for (let event of traceJson["traceEvents"]) {
-        let eventName = event["name"];
-
-        if (eventName === "TimeStamp") {
-          let message = event["args"]["data"]["message"];
-          if (message.startsWith("GPU::ORT")) {
-            const info = message.replace("GPU::ORT::", "").split("::");
-            if (gpuKernelIndex > kernelGroups[0]) {
-              kernelGroups.shift();
-              gpuKernelIndex = 0;
-            }
-            const name = `${info[0]}::${gpuKernelIndex}`;
-            gpuKernelIndex++;
-            const startTime = getMs("GPU", info[1]);
-            const endTime = getMs("GPU", info[2]);
-            let duration = getFloat(endTime - startTime);
-            if (duration === 0) {
-              duration = smallDuration;
-            }
-            timelineJson["GPU::ORT"].push({ name: name, start: startTime, duration: duration });
-          } else if (message.startsWith("CPU::ORT")) {
-            if (baseTime === 0) {
-              baseTime = getMs("CPU", event["ts"]);
-            }
-            handleMessage(message, getMs("CPU", event["ts"]));
-          }
-        } else if (chromeEventNames.indexOf(eventName) >= 0) {
-          let prefix = "";
-          if (event["args"]["label"]) {
-            prefix = `${event["args"]["label"]}::`;
-          }
-          let startTime = getMs("CPU", event["ts"]);
-          let duration = getFloat(event["dur"] / 1000);
-          timelineJson["CPU::CHROME"].push({
-            name: `${prefix}${eventName}`,
-            start: startTime,
-            duration: duration,
-          });
+        const name = `${info[0]}::${gpuKernelIndex}`;
+        gpuKernelIndex++;
+        const startTime = getMs("GPU", info[1]);
+        const endTime = getMs("GPU", info[2]);
+        let duration = getFloat(endTime - startTime);
+        if (duration === 0) {
+          duration = smallDuration;
         }
+        timelineJson["GPU::ORT"].push({ name: name, start: startTime, duration: duration });
+      } else if (message.startsWith("CPU::ORT")) {
+        if (baseTime === 0) {
+          baseTime = getMs("CPU", event["ts"]);
+        }
+        handleMessage(message, getMs("CPU", event["ts"]));
       }
-
-      const timelineJsonFile = traceFile.replace("-trace", "");
-      if (fs.existsSync(timelineJsonFile)) {
-        fs.truncateSync(timelineJsonFile, 0);
+    } else if (chromeEventNames.indexOf(eventName) >= 0) {
+      let prefix = "";
+      if (event["args"]["label"]) {
+        prefix = `${event["args"]["label"]}::`;
       }
-      fs.writeFileSync(timelineJsonFile, JSON.stringify(timelineJson));
+      let startTime = getMs("CPU", event["ts"]);
+      let duration = getFloat(event["dur"] / 1000);
+      timelineJson["CPU::CHROME"].push({
+        name: `${prefix}${eventName}`,
+        start: startTime,
+        duration: duration,
+      });
     }
   }
+
+  const timelineJsonFile = traceFile.replace("-trace", "");
+  if (fs.existsSync(timelineJsonFile)) {
+    fs.truncateSync(timelineJsonFile, 0);
+  }
+  fs.writeFileSync(timelineJsonFile, JSON.stringify(timelineJson));
 }
 
 function getFloat(value) {
