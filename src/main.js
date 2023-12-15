@@ -117,9 +117,9 @@ util.args =
       type: 'string',
       describe: 'extra toolkit url args',
     })
-    .option('trace', {
+    .option('enable-trace', {
       type: 'boolean',
-      describe: 'trace',
+      describe: 'enable trace',
     })
     .option('trace-timestamp', {
       type: 'string',
@@ -150,7 +150,7 @@ util.args =
       [
         'node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --timestamp day'
       ],
-      ['node $0 --trace --trace-timestamp 20220601'],
+      ['node $0 --enable-trace --trace-timestamp 20220601'],
       [
         'node $0 --tasks conformance --conformance-ep webgpu --model-name mobilenetv2-12 --timestamp day --skip-config // single test'
       ],
@@ -159,7 +159,7 @@ util.args =
       ],
       ['node $0 --tasks conformance --timestamp day --benchmark-json benchmark-wip.json --dev-mode'],
       [
-        'node $0 --tasks performance --performance-ep webgpu --model-name mobilenetv2-12 --trace --ort-url gyagp --dev-mode --timestamp day'
+        'node $0 --tasks performance --performance-ep webgpu --model-name mobilenetv2-12 --enable-trace --ort-url gh/20231215 -trace--timestamp day'
       ],
     ])
     .help()
@@ -279,7 +279,7 @@ async function main() {
     util.browserArgs.push(...util.args['browser-args'].split(' '));
   }
 
-  if ('trace' in util.args) {
+  if ('enable-trace' in util.args) {
     util.toolkitUrlArgs.push('enableTrace=true');
     util.browserArgs.push(...[
       '--enable-unsafe-webgpu',

@@ -38,7 +38,7 @@ function intersect(a, b) {
 
 async function startContext(traceFile = undefined) {
   let extraBrowserArgs = [];
-  if ('trace' in util.args) {
+  if ('enable-trace' in util.args) {
     extraBrowserArgs.push(`--trace-startup-file=${traceFile}`);
   }
 
@@ -200,7 +200,7 @@ async function runBenchmark(task) {
 
     if (!('disable-new-context' in util.args)) {
       let traceFile = undefined;
-      if ('trace' in util.args) {
+      if ('enable-trace' in util.args) {
         traceFile = `${util.timestampDir}/${benchmark.join('-').replace(/ /g, '_')}-trace.json`;
       }
       [context, page] = await startContext(traceFile);
@@ -261,7 +261,7 @@ async function runBenchmark(task) {
         url += `&${util.toolkitUrlArgs.join('&')}`;
       }
       if ('ort-url' in util.args) {
-        url += `&ortUrl=https://wp-27.sh.intel.com/workspace/project/${util.args['ort-url']}/onnxruntime`;
+        url += `&ortUrl=${util.args['ort-url']}`;
       } else {
         url += `&ortUrl=https://wp-27.sh.intel.com/workspace/project/onnxruntime`;
       }
@@ -384,7 +384,7 @@ async function runBenchmark(task) {
     util.upload(file, '/workspace/project/work/ort/perf');
   }
 
-  if ('trace' in util.args) {
+  if ('enable-trace' in util.args) {
     await parseTrace();
   }
 
