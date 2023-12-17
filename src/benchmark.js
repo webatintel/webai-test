@@ -267,7 +267,7 @@ async function benchmark(task) {
         url += "-webnn";
       }
       // update model
-      if (["whisper-tiny-decoder", "whisper-tiny-decoder-merged"].indexOf(modelName) >= 0) {
+      if (["t5-small-decoder"].indexOf(modelName) >= 0) {
         url += "&updateModel=true";
       }
 
