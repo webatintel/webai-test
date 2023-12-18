@@ -106,7 +106,7 @@ module.exports = {
   performanceEps: [],
   platform: platform,
   taskMetrics: taskMetrics,
-  timeout: 180 * 1000,
+  timeout: 90 * 1000,
   toolkitUrl: "modelUrl=server",
   toolkitUrlArgs: [],
   unitEps: [],

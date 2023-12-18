@@ -91,7 +91,6 @@ async function closeBrowser(browser) {
 
   const pid = browser.process().pid;
   process.kill(pid);
-
 }
 
 function getErrorResult(task) {
