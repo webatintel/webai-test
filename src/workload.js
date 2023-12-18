@@ -6,11 +6,11 @@ const readline = require("readline");
 const parseTrace = require("./trace.js");
 const util = require("./util.js");
 
-async function startContext(traceFile) {
+async function startBrowser(traceFile) {
   let extraBrowserArgs = [];
   extraBrowserArgs.push(`--trace-startup-file=${traceFile}`);
 
-  let context = await puppeteer.launch({
+  let browser = await puppeteer.launch({
     args: util["browserArgs"].concat(extraBrowserArgs),
     defaultViewport: null,
     executablePath: util["browserPath"],
@@ -18,16 +18,16 @@ async function startContext(traceFile) {
     ignoreHTTPSErrors: true,
     userDataDir: util.userDataDir,
   });
-  let page = await context.newPage();
-  return [context, page];
+  let page = await browser.newPage();
+  return [browser, page];
 }
 
 async function workload() {
-  let context;
+  let browser;
   let page;
 
   let traceFile = `${util.timestampDir}/workload-webgpu-trace.json`;
-  [context, page] = await startContext(traceFile);
+  [browser, page] = await startBrowser(traceFile);
 
   try {
     await page.goto(util.args['workload-url']);
@@ -54,7 +54,7 @@ async function workload() {
     });
   }
 
-  await context.close();
+  await browser.close();
   await parseTrace(traceFile);
 }
 

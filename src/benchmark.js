@@ -39,13 +39,13 @@ function intersect(a, b) {
   return a.filter((v) => b.includes(v));
 }
 
-async function startContext(traceFile = undefined) {
+async function startBrowser(traceFile = undefined) {
   let extraBrowserArgs = [];
   if ("enable-trace" in util.args) {
     extraBrowserArgs.push(`--trace-startup-file=${traceFile}`);
   }
 
-  let context = await puppeteer.launch({
+  let browser = await puppeteer.launch({
     args: util["browserArgs"].concat(extraBrowserArgs),
     defaultViewport: null,
     executablePath: util["browserPath"],
@@ -53,7 +53,7 @@ async function startContext(traceFile = undefined) {
     ignoreHTTPSErrors: true,
     userDataDir: util.userDataDir,
   });
-  let page = await context.newPage();
+  let page = await browser.newPage();
   page.on("console", async (msg) => {
     for (let i = 0; i < msg.args().length; ++i) {
       const consoleError = `[console] ${i}: ${await msg.args()[i].jsonValue()}`;
@@ -82,11 +82,11 @@ async function startContext(traceFile = undefined) {
     errorMsg += `${pageError.substring(0, errorMsgMaxLength)}<br>`;
   });
 
-  return [context, page];
+  return [browser, page];
 }
 
-async function closeContext(context) {
-  await context.close();
+async function closeBrowser(browser) {
+  await browser.close();
 }
 
 function getErrorResult(task) {
@@ -176,11 +176,11 @@ async function benchmark(task) {
   if (task === "conformance") {
     resultMetricsLength += 1;
   }
-  let context;
+  let browser;
   let page;
 
-  if ("disable-new-context" in util.args) {
-    [context, page] = await startContext();
+  if ("disable-new-browser" in util.args) {
+    [browser, page] = await startBrowser();
   }
 
   for (let i = 0; i < benchmarksLength; i++) {
@@ -194,11 +194,11 @@ async function benchmark(task) {
     util.log(`[${i + 1}/${benchmarksLength}] ${benchmark}`);
     util.log(util.getTimestamp("second"));
 
-    if (!("disable-new-context" in util.args)) {
+    if (!("disable-new-browser" in util.args)) {
       if ("enable-trace" in util.args) {
         traceFile = `${util.timestampDir}/${benchmark.join("-").replace(/ /g, "_")}-trace.json`;
       }
-      [context, page] = await startContext(traceFile);
+      [browser, page] = await startBrowser(traceFile);
     }
 
     // prepare result placeholder
@@ -338,8 +338,8 @@ async function benchmark(task) {
     util.log(result);
 
     try {
-      if (!("disable-new-context" in util.args)) {
-        await closeContext(context);
+      if (!("disable-new-browser" in util.args)) {
+        await closeBrowser(browser);
       }
     } catch (error) { }
 
@@ -349,8 +349,8 @@ async function benchmark(task) {
   }
 
   try {
-    if ("disable-new-context" in util.args) {
-      await closeContext(context);
+    if ("disable-new-browser" in util.args) {
+      await closeBrowser(browser);
     }
   } catch (error) { }
 

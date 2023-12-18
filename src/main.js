@@ -61,9 +61,9 @@ util.args = yargs
     type: "boolean",
     describe: "kill chrome before testing",
   })
-  .option("disable-new-context", {
+  .option("disable-new-browser", {
     type: "boolean",
-    describe: "start a new context for each test",
+    describe: "start a new browser for each test",
   })
   .option("pause-task", {
     type: "boolean",
@@ -145,7 +145,7 @@ util.args = yargs
     ],
     ['node $0 --browser-args="--enable-dawn-features=disable_workgroup_init --no-sandbox --enable-zero-copy"'],
     [
-      "node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --server-info --disable-new-context",
+      "node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --server-info --disable-new-browser",
     ],
     [
       "node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --timestamp day",

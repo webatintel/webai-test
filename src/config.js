@@ -100,7 +100,7 @@ async function getConfig() {
  * Get extra config info via Chrome
  */
 async function getExtraConfig() {
-  const context = await puppeteer.launch({
+  const browser = await puppeteer.launch({
     defaultViewport: null,
     executablePath: util["browserPath"],
     headless: false,
@@ -108,7 +108,7 @@ async function getExtraConfig() {
     userDataDir: util.userDataDir,
   });
 
-  const page = await context.newPage();
+  const page = await browser.newPage();
 
   // Chrome version and revision
   await page.goto("chrome://version");
@@ -157,7 +157,7 @@ async function getExtraConfig() {
 
   util["gpuDriverVersion"] = gpuInfo[1];
 
-  await context.close();
+  await browser.close();
 }
 
 module.exports = getConfig;
