@@ -86,7 +86,12 @@ async function startBrowser(traceFile = undefined) {
 }
 
 async function closeBrowser(browser) {
-  await browser.close();
+  // browser.close hangs on some machines. So use process.kill instead.
+  // await browser.close();
+
+  const pid = browser.process().pid;
+  process.kill(pid);
+
 }
 
 function getErrorResult(task) {
