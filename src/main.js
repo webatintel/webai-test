@@ -101,6 +101,10 @@ util.args = yargs
   })
   .option("timestamp", {
     type: "string",
+    describe: "timestamp",
+  })
+  .option("timestamp-format", {
+    type: "string",
     describe: "timestamp format, day or second",
     default: "second",
   })
@@ -112,13 +116,13 @@ util.args = yargs
     type: "string",
     describe: "extra toolkit url args",
   })
+  .option("trace-file", {
+    type: "string",
+    describe: "trace file",
+  })
   .option("enable-trace", {
     type: "boolean",
     describe: "enable trace",
-  })
-  .option("trace-timestamp", {
-    type: "string",
-    describe: "trace timestamp",
   })
   .option("upload", {
     type: "boolean",
@@ -148,18 +152,21 @@ util.args = yargs
       "node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --server-info --disable-new-browser",
     ],
     [
-      "node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --timestamp day",
+      "node $0 --tasks performance --model-name mobilenetv2-12 --performance-ep webgpu --warmup-times 0 --run-times 1 --timestamp-format day",
     ],
-    ["node $0 --enable-trace --trace-timestamp 20220601"],
+    ["node $0 --enable-trace --timestamp 20220601"],
     [
-      "node $0 --tasks conformance --conformance-ep webgpu --model-name mobilenetv2-12 --timestamp day --skip-config // single test",
+      "node $0 --tasks conformance --conformance-ep webgpu --model-name mobilenetv2-12 --timestamp-format day --skip-config // single test",
     ],
     [
-      "node $0 --tasks performance --performance-ep webgpu --model-name mobilenetv2-12 --timestamp day --skip-config // single test",
+      "node $0 --tasks performance --performance-ep webgpu --model-name mobilenetv2-12 --timestamp-format day --skip-config // single test",
     ],
-    ["node $0 --tasks conformance --timestamp day --benchmark-json benchmark-wip.json --dev-mode"],
+    ["node $0 --tasks conformance --timestamp-format day --benchmark-json benchmark-wip.json --dev-mode"],
     [
-      "node $0 --tasks performance --performance-ep webgpu --model-name mobilenetv2-12 --enable-trace --ort-url gh/20231215-trace --timestamp day",
+      "node $0 --tasks performance --performance-ep webgpu --model-name mobilenetv2-12 --enable-trace --ort-url gh/20231215-trace --timestamp-format day",
+    ],
+    [
+      "node $0 --tasks trace --timestamp 20231218 --trace-file workload-webgpu-trace",
     ],
   ])
   .help()
@@ -314,11 +321,7 @@ async function main() {
 
   for (let i = 0; i < util.args["repeat"]; i++) {
     // ensure logFile
-    if ("trace-timestamp" in util.args) {
-      util.timestamp = util.args["trace-timestamp"];
-    } else {
-      util.timestamp = util.getTimestamp(util.args["timestamp"]);
-    }
+    util.timestamp = util.getTimestamp(util.args["timestamp-format"]);
     util.timestampDir = path.join(util.outDir, util.timestamp);
     util.ensureDir(util.timestampDir);
     util.logFile = path.join(util.timestampDir, `${util.timestamp}.log`);
@@ -329,6 +332,8 @@ async function main() {
     if (util.args["repeat"] > 1) {
       util.log(`== Test round ${i + 1}/${util.args["repeat"]} ==`);
     }
+
+    let needReport = false;
     for (let task of tasks) {
       startTime = new Date();
       util.log(`=${task}=`);
@@ -336,6 +341,7 @@ async function main() {
         if (!(task === "performance" && util.warmupTimes === 0 && util.runTimes === 0)) {
           results[task] = await benchmark(task);
         }
+        needReport = true;
       } else if (task === "trace") {
         await parseTrace();
       } else if (task === "workload") {
@@ -344,7 +350,7 @@ async function main() {
       util.duration += `${task}: ${(new Date() - startTime) / 1000} `;
     }
 
-    if (!("trace-timestamp" in util.args)) {
+    if (needReport) {
       await report(results);
     }
   }
