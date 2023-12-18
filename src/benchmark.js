@@ -198,6 +198,7 @@ async function benchmark(task) {
     let traceFile;
 
     util.log(`[${i + 1}/${benchmarksLength}] ${benchmark}`);
+    util.log(util.getTimestamp("second"));
 
     if (!("disable-new-context" in util.args)) {
       if ("enable-trace" in util.args) {

@@ -169,19 +169,6 @@ util.args = yargs
   .help()
   .wrap(180).argv;
 
-function padZero(str) {
-  return ("0" + str).slice(-2);
-}
-
-function getTimestamp(format) {
-  const date = new Date();
-  let timestamp = date.getFullYear() + padZero(date.getMonth() + 1) + padZero(date.getDate());
-  if (format === "second") {
-    timestamp += padZero(date.getHours()) + padZero(date.getMinutes()) + padZero(date.getSeconds());
-  }
-  return timestamp;
-}
-
 async function main() {
   if ("kill-chrome" in util.args) {
     spawnSync("cmd", ["/c", "taskkill /F /IM chrome.exe /T"]);
@@ -340,7 +327,7 @@ async function main() {
     if ("trace-timestamp" in util.args) {
       util.timestamp = util.args["trace-timestamp"];
     } else {
-      util.timestamp = getTimestamp(util.args["timestamp"]);
+      util.timestamp = util.getTimestamp(util.args["timestamp"]);
     }
     util.timestampDir = path.join(util.outDir, util.timestamp);
     util.ensureDir(util.timestampDir);

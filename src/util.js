@@ -64,9 +64,22 @@ function getDuration(start, end) {
   return `${hours}:${("0" + minutes).slice(-2)}:${("0" + seconds).slice(-2)}`;
 }
 
+function getTimestamp(format) {
+  const date = new Date();
+  let timestamp = date.getFullYear() + padZero(date.getMonth() + 1) + padZero(date.getDate());
+  if (format === "second") {
+    timestamp += padZero(date.getHours()) + padZero(date.getMinutes()) + padZero(date.getSeconds());
+  }
+  return timestamp;
+}
+
 function log(info) {
   console.log(info);
   fs.appendFileSync(this.logFile, String(info) + "\n");
+}
+
+function padZero(str) {
+  return ("0" + str).slice(-2);
 }
 
 function scp(src, dest) {
@@ -104,6 +117,7 @@ module.exports = {
   ensureNoDir: ensureNoDir,
   ensureNoFile: ensureNoFile,
   getDuration: getDuration,
+  getTimestamp: getTimestamp,
   log: log,
   scp: scp,
   sleep: sleep,
