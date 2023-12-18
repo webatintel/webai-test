@@ -45,54 +45,48 @@ async function startContext(traceFile = undefined) {
     extraBrowserArgs.push(`--trace-startup-file=${traceFile}`);
   }
 
-  if (!util.dryrun) {
-    let context = await puppeteer.launch({
-      args: util["browserArgs"].concat(extraBrowserArgs),
-      defaultViewport: null,
-      executablePath: util["browserPath"],
-      headless: false,
-      ignoreHTTPSErrors: true,
-      userDataDir: util.userDataDir,
-    });
-    let page = await context.newPage();
-    page.on("console", async (msg) => {
-      for (let i = 0; i < msg.args().length; ++i) {
-        const consoleError = `[console] ${i}: ${await msg.args()[i].jsonValue()}`;
-        if (consoleError.search("Blocking on the main thread is very dangerous")) {
-          continue;
-        }
-        util.log(consoleError);
-        errorMsg += `${consoleError.substring(0, errorMsgMaxLength)}<br>`;
+  let context = await puppeteer.launch({
+    args: util["browserArgs"].concat(extraBrowserArgs),
+    defaultViewport: null,
+    executablePath: util["browserPath"],
+    headless: false,
+    ignoreHTTPSErrors: true,
+    userDataDir: util.userDataDir,
+  });
+  let page = await context.newPage();
+  page.on("console", async (msg) => {
+    for (let i = 0; i < msg.args().length; ++i) {
+      const consoleError = `[console] ${i}: ${await msg.args()[i].jsonValue()}`;
+      if (consoleError.search("Blocking on the main thread is very dangerous")) {
+        continue;
       }
-    });
-    page.on("pageerror", (error) => {
-      const pageError = `[pageerror] ${error}`;
+      util.log(consoleError);
+      errorMsg += `${consoleError.substring(0, errorMsgMaxLength)}<br>`;
+    }
+  });
+  page.on("pageerror", (error) => {
+    const pageError = `[pageerror] ${error}`;
 
-      // Temporarily skip some WebNN errors
-      if (
-        pageError.startsWith("[pageerror] Error: TypeError: Failed to execute 'fetch' on 'WorkerGlobalScope'") ||
-        pageError.startsWith("[pageerror] Error: ErrorEvent") ||
-        pageError.startsWith("[pageerror] Error: null")
-      ) {
-        return;
-      }
+    // Temporarily skip some WebNN errors
+    if (
+      pageError.startsWith("[pageerror] Error: TypeError: Failed to execute 'fetch' on 'WorkerGlobalScope'") ||
+      pageError.startsWith("[pageerror] Error: ErrorEvent") ||
+      pageError.startsWith("[pageerror] Error: null")
+    ) {
+      return;
+    }
 
-      util.hasError = true;
-      util.errorMsg = pageError;
-      util.log(pageError);
-      errorMsg += `${pageError.substring(0, errorMsgMaxLength)}<br>`;
-    });
+    util.hasError = true;
+    util.errorMsg = pageError;
+    util.log(pageError);
+    errorMsg += `${pageError.substring(0, errorMsgMaxLength)}<br>`;
+  });
 
-    return [context, page];
-  } else {
-    return [undefined, undefined];
-  }
+  return [context, page];
 }
 
 async function closeContext(context) {
-  if (!util.dryrun) {
-    await context.close();
-  }
+  await context.close();
 }
 
 function getErrorResult(task) {
@@ -218,147 +212,127 @@ async function benchmark(task) {
     }
     let result = results[results.length - 1];
 
-    if (util.dryrun) {
-      let metricIndex = 0;
-      while (metricIndex < metricsLength) {
-        if (task === "conformance") {
-          result[epIndex * resultMetricsLength + metricIndex + 1] = "true";
-        } else if (task === "performance") {
-          let tmpIndex = epIndex * resultMetricsLength + metricIndex;
-          result[tmpIndex + 1] = tmpIndex + 1;
-          let op_time = result[epsLength * resultMetricsLength + 1];
-          for (let i = 0; i < 3; i++) {
-            let op = `op${i}`;
-            if (!(op in op_time)) {
-              op_time[op] = Array(epsLength).fill(defaultValue);
-            }
-            op_time[op][epIndex] = i * epsLength + epIndex + 1;
+
+    // get url
+    let url = `${util.toolkitUrl}?tasks=${task}`;
+
+    for (let index = 0; index < util.parameters.length; index++) {
+      if (benchmarks[i][index]) {
+        if (util.parameters[index] === "ep" && benchmarks[i][index].startsWith("webnn")) {
+          let deviceType = benchmarks[i][index].replace("webnn-", "");
+          url += `&${util.parameters[index]}=webnn&deviceType=${deviceType}`;
+          if (deviceType === "cpu") {
+            url += `&webnnNumThreads=${util["cpuThreads"]}`;
           }
+        } else if (util.parameters[index] === "ep" && benchmarks[i][index] === "webgpu-fdo") {
+          url += `&${util.parameters[index]}=webgpu&enableFreeDimensionOverrides=true`;
+        } else {
+          url += `&${util.parameters[index]}=${benchmarks[i][index]}`;
         }
-        metricIndex += 1;
       }
+    }
+    if (util.toolkitUrlArgs) {
+      url += `&${util.toolkitUrlArgs.join("&")}`;
+    }
+    if ("ort-url" in util.args) {
+      url += `&ortUrl=${util.args["ort-url"]}`;
     } else {
-      // get url
-      let url = `${util.toolkitUrl}?tasks=${task}`;
+      url += `&ortUrl=https://wp-27.sh.intel.com/workspace/project/onnxruntime`;
+    }
+    if (ep.startsWith("webnn")) {
+      url += "-webnn";
+    }
+    // update model
+    if (["t5-small-decoder"].indexOf(modelName) >= 0) {
+      url += "&updateModel=true";
+    }
 
-      for (let index = 0; index < util.parameters.length; index++) {
-        if (benchmarks[i][index]) {
-          if (util.parameters[index] === "ep" && benchmarks[i][index].startsWith("webnn")) {
-            let deviceType = benchmarks[i][index].replace("webnn-", "");
-            url += `&${util.parameters[index]}=webnn&deviceType=${deviceType}`;
-            if (deviceType === "cpu") {
-              url += `&webnnNumThreads=${util["cpuThreads"]}`;
-            }
-          } else if (util.parameters[index] === "ep" && benchmarks[i][index] === "webgpu-fdo") {
-            url += `&${util.parameters[index]}=webgpu&enableFreeDimensionOverrides=true`;
-          } else {
-            url += `&${util.parameters[index]}=${benchmarks[i][index]}`;
-          }
-        }
-      }
-      if (util.toolkitUrlArgs) {
-        url += `&${util.toolkitUrlArgs.join("&")}`;
-      }
-      if ("ort-url" in util.args) {
-        url += `&ortUrl=${util.args["ort-url"]}`;
+    if (task === "performance") {
+      let warmupTimes;
+      if ("warmup-times" in util.args) {
+        warmupTimes = parseInt(util.args["warmup-times"]);
       } else {
-        url += `&ortUrl=https://wp-27.sh.intel.com/workspace/project/onnxruntime`;
+        warmupTimes = 5;
       }
-      if (ep.startsWith("webnn")) {
-        url += "-webnn";
+      util.warmupTimes = warmupTimes;
+
+      let runTimes;
+      if ("run-times" in util.args) {
+        runTimes = parseInt(util.args["run-times"]);
+      } else {
+        runTimes = 5;
       }
-      // update model
-      if (["t5-small-decoder"].indexOf(modelName) >= 0) {
-        url += "&updateModel=true";
+      util.runTimes = runTimes;
+      url += `&warmupTimes=${warmupTimes}&runTimes=${runTimes}`;
+    }
+
+    url += `&wasmThreads=${util["cpuThreads"]}`;
+
+    if (util.updateModelNames.indexOf(modelName) >= 0) {
+      url += "&updateModel=true";
+    }
+
+    console.log(url);
+
+    try {
+      await page.goto(url);
+      if (!("crossOriginIsolated" in util)) {
+        util["crossOriginIsolated"] = await page.evaluate(() => crossOriginIsolated);
       }
 
-      if (task === "performance") {
-        let warmupTimes;
-        if ("warmup-times" in util.args) {
-          warmupTimes = parseInt(util.args["warmup-times"]);
-        } else {
-          warmupTimes = 5;
+      const retryTimes = util.timeout / 1000;
+      let retryTimesLeft = retryTimes;
+      while (retryTimesLeft > 0) {
+        await page
+          .waitForSelector("#result", { timeout: 1000 })
+          .then(() => {
+            retryTimesLeft = 0;
+          })
+          .catch((e) => {
+            retryTimesLeft--;
+            if (retryTimesLeft === 0) {
+              throw new Error("Timeout to get the result");
+            }
+          });
+        if (util.hasError) {
+          testResult = getErrorResult(task);
+          util.hasError = false;
+          throw new Error(util.errorMsg);
         }
-        util.warmupTimes = warmupTimes;
-
-        let runTimes;
-        if ("run-times" in util.args) {
-          runTimes = parseInt(util.args["run-times"]);
-        } else {
-          runTimes = 5;
-        }
-        util.runTimes = runTimes;
-        url += `&warmupTimes=${warmupTimes}&runTimes=${runTimes}`;
       }
+      testResult = await page.$eval("#result", (el) => el.textContent);
+    } catch (error) {
+      console.log(error);
+      testResult = getErrorResult(task);
+    }
 
-      url += `&wasmThreads=${util["cpuThreads"]}`;
+    // handle errorMsg
+    if (task === "conformance") {
+      results[results.length - 1][(epIndex + 1) * resultMetricsLength] = errorMsg;
+    }
+    errorMsg = "";
 
-      if (util.updateModelNames.indexOf(modelName) >= 0) {
-        url += "&updateModel=true";
-      }
+    // pause if needed
+    if ("pause-task" in util.args) {
+      const readlineInterface = readline.createInterface({ input: process.stdin, output: process.stdout });
+      await new Promise((resolve) => {
+        readlineInterface.question("Press Enter to continue...\n", resolve);
+      });
+    }
 
-      console.log(url);
+    // handle error
+    if (util.hasError) {
+      testResult = getErrorResult(task);
+      util.hasError = false;
+    }
 
-      try {
-        await page.goto(url);
-        if (!("crossOriginIsolated" in util)) {
-          util["crossOriginIsolated"] = await page.evaluate(() => crossOriginIsolated);
-        }
-
-        const retryTimes = util.timeout / 1000;
-        let retryTimesLeft = retryTimes;
-        while (retryTimesLeft > 0) {
-          await page
-            .waitForSelector("#result", { timeout: 1000 })
-            .then(() => {
-              retryTimesLeft = 0;
-            })
-            .catch((e) => {
-              retryTimesLeft--;
-              if (retryTimesLeft === 0) {
-                throw new Error("Timeout to get the result");
-              }
-            });
-          if (util.hasError) {
-            testResult = getErrorResult(task);
-            util.hasError = false;
-            throw new Error(util.errorMsg);
-          }
-        }
-        testResult = await page.$eval("#result", (el) => el.textContent);
-      } catch (error) {
-        console.log(error);
-        testResult = getErrorResult(task);
-      }
-
-      // handle errorMsg
-      if (task === "conformance") {
-        results[results.length - 1][(epIndex + 1) * resultMetricsLength] = errorMsg;
-      }
-      errorMsg = "";
-
-      // pause if needed
-      if ("pause-task" in util.args) {
-        const readlineInterface = readline.createInterface({ input: process.stdin, output: process.stdout });
-        await new Promise((resolve) => {
-          readlineInterface.question("Press Enter to continue...\n", resolve);
-        });
-      }
-
-      // handle error
-      if (util.hasError) {
-        testResult = getErrorResult(task);
-        util.hasError = false;
-      }
-
-      // handle result
-      let metricIndex = 0;
-      let testResults = JSON.parse(testResult);
-      while (metricIndex < metricsLength) {
-        results[results.length - 1][epIndex * resultMetricsLength + metricIndex + 1] =
-          testResults[util.taskMetrics[task][metricIndex]];
-        metricIndex += 1;
-      }
+    // handle result
+    let metricIndex = 0;
+    let testResults = JSON.parse(testResult);
+    while (metricIndex < metricsLength) {
+      results[results.length - 1][epIndex * resultMetricsLength + metricIndex + 1] =
+        testResults[util.taskMetrics[task][metricIndex]];
+      metricIndex += 1;
     }
 
     util.log(result);

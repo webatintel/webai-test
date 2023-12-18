@@ -52,10 +52,6 @@ util.args = yargs
     type: "boolean",
     describe: "disable breakdown",
   })
-  .option("dryrun", {
-    type: "boolean",
-    describe: "dryrun the test",
-  })
   .option("email", {
     alias: "e",
     type: "string",
@@ -267,12 +263,6 @@ async function main() {
 
   if ("toolkit-url-args" in util.args) {
     util.toolkitUrlArgs.push(...util.args["toolkit-url-args"].split("&"));
-  }
-
-  if ("dryrun" in util.args) {
-    util.dryrun = true;
-  } else {
-    util.dryrun = false;
   }
 
   if ("toolkit-url" in util.args) {
