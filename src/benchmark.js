@@ -86,11 +86,14 @@ async function startBrowser(traceFile = undefined) {
 }
 
 async function closeBrowser(browser) {
-  // browser.close hangs on some machines. So use process.kill instead.
-  // await browser.close();
+  // browser.close hangs on some machines. So use process.kill instead if trace is disabled
 
-  const pid = browser.process().pid;
-  process.kill(pid);
+  if ('enable-trace' in util.args) {
+    await browser.close();
+  } else {
+    const pid = browser.process().pid;
+    process.kill(pid);
+  }
 }
 
 function getErrorResult(task) {
@@ -215,7 +218,6 @@ async function benchmark(task) {
       previousModelName = modelName;
     }
     let result = results[results.length - 1];
-
 
     // get url
     let url = `${util.toolkitUrl}?tasks=${task}`;
