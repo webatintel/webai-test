@@ -30,6 +30,23 @@ const server = "wp@wp-27.sh.intel.com";
 const sshKey = path.join(os.homedir(), ".ssh/id_rsa_common");
 const remoteCmdArgs = fs.existsSync(sshKey) ? `-i ${sshKey}` : "";
 
+
+async function asyncFunctionWithTimeout(asyncPromise, timeout) {
+  let timeoutHandle;
+
+  const timeoutPromise = new Promise((_resolve, reject) => {
+    timeoutHandle = setTimeout(
+      () => reject(new Error('Async function timeout limit reached')),
+      timeout
+    );
+  });
+
+  return Promise.race([asyncPromise, timeoutPromise]).then(result => {
+    clearTimeout(timeoutHandle);
+    return result;
+  })
+}
+
 function capitalize(s) {
   return s[0].toUpperCase() + s.slice(1);
 }
@@ -112,6 +129,7 @@ module.exports = {
   unitEps: [],
   updateModelNames: [],
 
+  asyncFunctionWithTimeout: asyncFunctionWithTimeout,
   capitalize: capitalize,
   ensureDir: ensureDir,
   ensureNoDir: ensureNoDir,

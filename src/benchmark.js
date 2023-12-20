@@ -86,11 +86,19 @@ async function startBrowser(traceFile = undefined) {
 }
 
 async function closeBrowser(browser) {
-  // browser.close hangs on some machines. So use process.kill instead if trace is disabled
+  // browser.close hangs on some machines, and process.kill also has chance to fail to start browser.
 
+  // For trace, we have to use browser.close() for trace log
   if ('enable-trace' in util.args) {
     await browser.close();
-  } else {
+    return;
+  }
+
+  try {
+    util.asyncFunctionWithTimeout(await browser.close(), 10);
+    console.log('Close the browser with browser.close');
+  } catch (error) {
+    console.log('Close the browser with process.kill');
     const pid = browser.process().pid;
     process.kill(pid);
   }
@@ -294,7 +302,7 @@ async function benchmark(task) {
           .then(() => {
             retryTimesLeft = 0;
           })
-          .catch((e) => {
+          .catch((error) => {
             retryTimesLeft--;
             if (retryTimesLeft === 0) {
               throw new Error("Timeout to get the result");
