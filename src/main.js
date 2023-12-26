@@ -177,6 +177,7 @@ async function main() {
     spawnSync("cmd", ["/c", "taskkill /F /IM chrome.exe /T"]);
   }
 
+  // set util members
   let browserPath;
   let userDataDir;
   if (util.args["browser"] === "chrome_canary") {
@@ -276,6 +277,12 @@ async function main() {
     util.toolkitUrl = util.args["toolkit-url"];
   }
 
+  if ("ort-url" in util.args) {
+    util.ortUrl = util.args["ort-url"];
+  } else {
+    util.ortUrl = "https://wp-27.sh.intel.com/workspace/project/onnxruntime";
+  }
+
   let tasks = util.args["tasks"].split(",");
 
   if (!fs.existsSync(util.outDir)) {
@@ -307,6 +314,7 @@ async function main() {
     }
   };
 
+  // run tasks
   let results = {};
   util.duration = "";
   let startTime;

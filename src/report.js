@@ -228,6 +228,7 @@ async function report(results) {
     "gpuName",
     "gpuVendorId",
     "hostname",
+    "ortUrl",
     "osVersion",
     "platform",
     "runTimes",

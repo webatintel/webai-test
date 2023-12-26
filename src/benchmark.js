@@ -248,11 +248,8 @@ async function benchmark(task) {
     if (util.toolkitUrlArgs) {
       url += `&${util.toolkitUrlArgs.join("&")}`;
     }
-    if ("ort-url" in util.args) {
-      url += `&ortUrl=${util.args["ort-url"]}`;
-    } else {
-      url += `&ortUrl=https://wp-27.sh.intel.com/workspace/project/onnxruntime`;
-    }
+    url += `&ortUrl=${util.ortUrl}`;
+
     if (ep.startsWith("webnn")) {
       url += "-webnn";
     }
