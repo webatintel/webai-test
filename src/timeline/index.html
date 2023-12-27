@@ -93,7 +93,14 @@
       canvas.height = screen.height * 0.8;
 
       // get data
-      const text = await readFileAsync(`../../out/${getParamByName("file")}.json`);
+      const file = getParamByName("file");
+      let jsonFile;
+      if (file.startsWith("gh")) {
+        jsonFile = `https://webatintel.github.io/ort-web/trace/${file.replace("gh/", "")}.json?raw=true`;
+      } else {
+        jsonFile = `../../out/${file}.json`;
+      }
+      const text = await readFileAsync(jsonFile);
       const data = JSON.parse(text);
 
       // get maxDispatchIndex and set color index
