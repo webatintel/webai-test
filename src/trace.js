@@ -26,7 +26,7 @@ function parseTrace(traceFile) {
   const chromeEventNames = [
     "DeviceBase::APICreateComputePipeline",
     "CreateComputePipelineAsyncTask::Run",
-    "DeviceBase::APICreateComputePipeline",
+    "DeviceBase::APICreateComputePipelineAsync",
     "DeviceBase::APICreateShaderModule",
     "Queue::Submit",
   ];
@@ -89,11 +89,12 @@ function parseTrace(traceFile) {
         }
         gpuKernelIndex++;
         const name = `${info[0]}::${gpuInferenceIndex}::${gpuKernelIndex}`;
-        const startTime = getMs("GPU", info[1]);
+        let startTime = getMs("GPU", info[1]);
         const endTime = getMs("GPU", info[2]);
         let duration = getFloat(endTime - startTime);
         if (duration === 0) {
           duration = smallDuration;
+          startTime -= smallDuration;
         }
         timelineJson["GPU::ORT"].push({ name: name, start: startTime, duration: duration });
       }
