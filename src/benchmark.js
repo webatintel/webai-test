@@ -55,13 +55,16 @@ async function startBrowser(traceFile = undefined) {
   });
   let page = await browser.newPage();
   page.on("console", async (msg) => {
-    for (let i = 0; i < msg.args().length; ++i) {
-      const consoleError = `[console] ${i}: ${await msg.args()[i].jsonValue()}`;
-      if (consoleError.search("Blocking on the main thread is very dangerous")) {
-        continue;
+    try {
+      for (let i = 0; i < msg.args().length; ++i) {
+        const consoleError = `[console] ${i}: ${await msg.args()[i].jsonValue()}`;
+        if (consoleError.search("Blocking on the main thread is very dangerous")) {
+          continue;
+        }
+        util.log(consoleError);
+        errorMsg += `${consoleError.substring(0, errorMsgMaxLength)}<br>`;
       }
-      util.log(consoleError);
-      errorMsg += `${consoleError.substring(0, errorMsgMaxLength)}<br>`;
+    } catch (error) {
     }
   });
   page.on("pageerror", (error) => {
