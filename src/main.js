@@ -139,7 +139,7 @@ util.args = yargs
   .option("workload-timeout", {
     type: "number",
     describe: "workload timeout in seconds",
-    default: 10,
+    default: 5,
   })
   .example([
     ["node $0 --email a@intel.com;b@intel.com // Send report to emails"],

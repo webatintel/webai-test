@@ -66,7 +66,7 @@ function parseTrace(traceFile) {
         prefix = `${event["args"]["label"]}::`;
       }
       let startTime = getMs("CPU", event["ts"]);
-      let duration = getFloat(event["dur"] / 1000);
+      let duration = util.getFloat(event["dur"] / 1000);
       timelineJson["CPU::CHROME"].push({
         name: `${prefix}${eventName}`,
         start: startTime,
@@ -91,7 +91,7 @@ function parseTrace(traceFile) {
         const name = `${info[0]}::${gpuInferenceIndex}::${gpuKernelIndex}`;
         let startTime = getMs("GPU", info[1]);
         const endTime = getMs("GPU", info[2]);
-        let duration = getFloat(endTime - startTime);
+        let duration = util.getFloat(endTime - startTime);
         if (duration === 0) {
           duration = smallDuration;
           startTime -= smallDuration;
@@ -108,15 +108,11 @@ function parseTrace(traceFile) {
   fs.writeFileSync(timelineJsonFile, JSON.stringify(timelineJson));
 }
 
-function getFloat(value) {
-  return Math.round(parseFloat(value) * 100) / 100;
-}
-
 function getMs(type, tick) {
   if (type === "CPU") {
-    return getFloat((tick - (cpuBase * 1000000) / cpuFreq) / 1000 - baseTime);
+    return util.getFloat((tick - (cpuBase * 1000000) / cpuFreq) / 1000 - baseTime);
   } else {
-    return getFloat(((tick - gpuBase) * 1000) / gpuFreq - baseTime);
+    return util.getFloat(((tick - gpuBase) * 1000) / gpuFreq - baseTime);
   }
 }
 
@@ -151,7 +147,7 @@ function handleMessage(message, timeline) {
       timelineStack["CPU::ORT"].push(child);
     } else if (message.startsWith("CPU::ORT::FUNC_END")) {
       const child = timelineStack["CPU::ORT"].pop();
-      child["duration"] = getFloat(timeline - child["start"]);
+      child["duration"] = util.getFloat(timeline - child["start"]);
       if (timelineStack["CPU::ORT"].length === 0) {
         if (!("CPU::ORT" in timelineJson)) {
           timelineJson["CPU::ORT"] = [];

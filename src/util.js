@@ -81,6 +81,10 @@ function getDuration(start, end) {
   return `${hours}:${("0" + minutes).slice(-2)}:${("0" + seconds).slice(-2)}`;
 }
 
+function getFloat(value) {
+  return Math.round(parseFloat(value) * 100) / 100;
+}
+
 function getTimestamp(format) {
   const date = new Date();
   let timestamp = date.getFullYear() + padZero(date.getMonth() + 1) + padZero(date.getDate());
@@ -135,6 +139,7 @@ module.exports = {
   ensureNoDir: ensureNoDir,
   ensureNoFile: ensureNoFile,
   getDuration: getDuration,
+  getFloat: getFloat,
   getTimestamp: getTimestamp,
   log: log,
   scp: scp,

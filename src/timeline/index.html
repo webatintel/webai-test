@@ -2,7 +2,6 @@
   <h1 align="center">ONNX Runtime Trace</h1>
   <div id="info"></div>
   <script src="timeline.js"></script>
-  <script src="../../util/base.js"></script>
   <script>
     "use strict";
 
@@ -60,12 +59,47 @@
       return newColors;
     }
 
+    function getFloat(value, decimalPlaces = 2) {
+      return parseFloat(value.toFixed(decimalPlaces));
+    }
+
+    function getParamByName(name, url) {
+      if (!url) url = window.location.href;
+      name = name.replace(/[\[\]]/g, "\\$&");
+      let regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)", "i");
+      let match = regex.exec(url);
+      if (!match) return null;
+      if (!match[2]) return "";
+      return decodeURIComponent(match[2].replace(/\+/g, " "));
+    }
+
     function getRunIndex(time) {
       for (let i = 0; i < runStarts.length; i++) {
         if (time >= runStarts[i] && time < runStarts[i + 1]) {
           return i;
         }
       }
+    }
+
+    async function readFileAsync(file) {
+      var xhr = new XMLHttpRequest();
+      xhr.open("HEAD", file);
+      //xhr.send();
+
+      return new Promise(function (resolve, reject) {
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState == 4) {
+            if (xhr.status >= 300) {
+              reject("Error, status code = " + xhr.status);
+            } else {
+              resolve(xhr.responseText);
+            }
+          }
+        };
+        xhr.overrideMimeType("application/json");
+        xhr.open("get", file, true);
+        xhr.send();
+      });
     }
 
     function setColor(item) {
