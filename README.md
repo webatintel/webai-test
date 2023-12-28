@@ -53,8 +53,12 @@ In theory, trace can be enabled for all the tasks. However, as it's attached to 
 
 Example:
 
+- Change your application
+
+  - Point your web application to onnxruntime build with trace support, like `<script src="https://webatintel.github.io/ort-web/20231227-trace/ort.webgpu.js" crossorigin="anonymous"> </script>`
+  - Enable trace with env at the beginning of your code, i.e., "ort.env.wasm.trace = true;"
+
 - Clone this repo with "git clone https://github.com/webatintel/ort-test"
-- Point your web application to onnxruntime build with trace support, like "<script src="https://webatintel.github.io/ort-web/20231227-trace/ort.webgpu.js" crossorigin="anonymous"> </script>"
 - cd ort-test/src, run "node main.js --timestamp-format day --tasks workload --workload-url <workload_url> --enable-trace"
 - start a local web server, like "python -mhttp.server"
-- visit "http://localhost:8000/ort-test/src/timeline?file=<date>/workload-webgpu"
+- visit "http://localhost:8000/ort-test/src/timeline?file=[date]/workload-webgpu"
