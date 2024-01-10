@@ -231,7 +231,7 @@ async function benchmark(task) {
     let result = results[results.length - 1];
 
     // get url
-    let url = `${util.toolkitUrl}?tasks=${task}`;
+    let url = `${util.toolkitUrl}?task=${task}`;
 
     for (let index = 0; index < util.parameters.length; index++) {
       if (benchmarks[i][index]) {
