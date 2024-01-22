@@ -164,18 +164,28 @@
               maxDispatchIndex = dispatchIndex;
             }
             dispatchIndex = -1;
-            continue;
-          }
-          itemSessionHandlerRunChild.color = dispatchIndex;
-          data[gpuOrt][gpuKernelIndex++].color = dispatchIndex;
-
-          for (let child of itemSessionHandlerRunChild.children) {
-            child.color = dispatchIndex;
-            if ("children" in child && child.children[0].name === "WebGpuBackend.flush") {
+          } else if (itemSessionHandlerRunChild.name.startsWith("ProgramManager.run")) {
+            if (
+              "children" in itemSessionHandlerRunChild &&
+              itemSessionHandlerRunChild.children[0].name === "WebGpuBackend.flush"
+            ) {
               if (dispatchIndex > maxDispatchIndex) {
                 maxDispatchIndex = dispatchIndex;
               }
               dispatchIndex = -1;
+            }
+          } else {
+            itemSessionHandlerRunChild.color = dispatchIndex;
+            data[gpuOrt][gpuKernelIndex++].color = dispatchIndex;
+
+            for (let child of itemSessionHandlerRunChild.children) {
+              child.color = dispatchIndex;
+              if ("children" in child && child.children[0].name === "WebGpuBackend.flush") {
+                if (dispatchIndex > maxDispatchIndex) {
+                  maxDispatchIndex = dispatchIndex;
+                }
+                dispatchIndex = -1;
+              }
             }
           }
         }

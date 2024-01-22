@@ -22,7 +22,7 @@
     "editor.formatOnSave": true
   },
   "editor.defaultFormatter": "xaver.clang-format",
-  "editor.rulers": [80],
+  "editor.rulers": [120],
   "clang-format.style": "Google",
   "files.insertFinalNewline": true,
   "editor.detectIndentation": false,
