@@ -34,7 +34,6 @@ const server = 'wp@wp-27.sh.intel.com';
 const sshKey = path.join(os.homedir(), '.ssh/id_rsa_common');
 const remoteCmdArgs = fs.existsSync(sshKey) ? `-i ${sshKey}` : '';
 
-
 async function asyncFunctionWithTimeout(asyncPromise, timeout) {
   let timeoutHandle;
 

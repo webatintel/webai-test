@@ -263,7 +263,11 @@ async function benchmark(task) {
       url += '&updateModel=true';
     }
 
-    if (task === 'performance') {
+    if (task === 'conformance') {
+      if (ep === 'webgpu') {
+        url += '&runTimes=1';
+      }
+    } else if (task === 'performance') {
       let warmupTimes;
       if ('warmup-times' in util.args) {
         warmupTimes = parseInt(util.args['warmup-times']);
