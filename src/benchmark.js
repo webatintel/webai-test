@@ -149,7 +149,7 @@ async function benchmark(task) {
         config['ep'] = util.args['conformance-ep'].split(',');
       } else {
         config['ep'] = structuredClone(util.allEps.filter(
-          (item) => ['wasm', 'webgpu-fdo'].indexOf(item) < 0));
+          (item) => ['wasm'].indexOf(item) < 0));
         // removeSlowEps(config['ep']);
       }
       for (let ep of config['ep']) {
@@ -185,7 +185,7 @@ async function benchmark(task) {
   let previousModelName = '';
 
   // format: testName, (first, average, best) * (webgpu, wasm, webnn-gpu,
-  // webnn-cpu, webgpu-fdo)
+  // webnn-cpu)
   let results = [];
   let defaultValue = 'NA';
   let epsLength = util.allEps.length;
@@ -248,10 +248,6 @@ async function benchmark(task) {
           if (deviceType === 'cpu') {
             url += `&webnnNumThreads=${util['cpuThreads']}`;
           }
-        } else if (
-          util.parameters[index] === 'ep' &&
-          benchmarks[i][index] === 'webgpu-fdo') {
-          url += `&${util.parameters[index]}=webgpu&enableFreeDimensionOverrides=true`;
         } else {
           url += `&${util.parameters[index]}=${benchmarks[i][index]}`;
         }
@@ -263,7 +259,7 @@ async function benchmark(task) {
     url += `&ortUrl=${util.ortUrl}`;
 
     // update model
-    if (['t5-small-decoder'].indexOf(modelName) >= 0) {
+    if ([''].indexOf(modelName) >= 0) {
       url += '&updateModel=true';
     }
 
