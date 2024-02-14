@@ -140,9 +140,9 @@ async function report(results) {
           }
           let style = neutralStyle;
           if (task === "conformance") {
-            if (epTotalValue === "false") {
+            if (epTotalValue.includes("false")) {
               style = badStyle;
-            } else if (epTotalValue === "true") {
+            } else {
               style = goodStyle;
             }
           }
