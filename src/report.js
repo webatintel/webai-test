@@ -146,10 +146,9 @@ async function report(results) {
               style = goodStyle;
             }
           }
+          benchmarkTable += `<td ${style}>${epTotalValue}</td>`;
           if (task === "conformance") {
-            benchmarkTable += `<td ${style}>[${epTotalValue}]</td><td>${result[epIndex * metricsLength + metricIndex + 2]}</td>`;
-          } else {
-            benchmarkTable += `<td ${style}>${epTotalValue}</td>`;
+            benchmarkTable += `<td>${result[epIndex * metricsLength + metricIndex + 2]}</td>`;
           }
           if (metric === "Subsequent average" && util.breakdown) {
             benchmarkTable += `<td>${epOpsValue}</td>`;

@@ -108,7 +108,7 @@ async function closeBrowser(browser) {
 
 function getErrorResult(task) {
   if (task === 'conformance') {
-    return '{"result": [false]}';
+    return '{"result": "[false]"}';
   } else if (task === 'performance') {
     return '{"first":"NA","average":"NA","best":"NA"}';
   }
