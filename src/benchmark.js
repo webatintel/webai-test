@@ -184,8 +184,7 @@ async function benchmark(task) {
   let benchmarksLength = benchmarks.length;
   let previousModelName = '';
 
-  // format: testName, (first, average, best) * (webgpu, wasm, webnn-gpu,
-  // webnn-cpu)
+  // format: testName, (first, average, best) * (webgpu, wasm, webnn-gpu)
   let results = [];
   let defaultValue = 'NA';
   let epsLength = util.allEps.length;
@@ -272,7 +271,7 @@ async function benchmark(task) {
       if ('warmup-times' in util.args) {
         warmupTimes = parseInt(util.args['warmup-times']);
       } else {
-        warmupTimes = 5;
+        warmupTimes = 10;
       }
       util.warmupTimes = warmupTimes;
 
