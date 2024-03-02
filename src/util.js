@@ -7,8 +7,7 @@ const path = require('path');
 let browserArgs = ['--enable-features=SharedArrayBuffer', '--start-maximized'];
 // webgpu
 browserArgs.push(
-  ...['--enable-webgpu-developer-features',
-    '--enable-dawn-features=use_dxc,disable_robustness']);
+  ...['--enable-webgpu-developer-features']);
 // webnn
 browserArgs.push(
   ...['--enable-features=WebMachineLearningNeuralNetwork',
