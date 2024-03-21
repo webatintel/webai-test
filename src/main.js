@@ -9,6 +9,7 @@ const yargs = require('yargs');
 
 const benchmark = require('./benchmark.js');
 const config = require('./config.js');
+const {syncNative, buildNative, runNative} = require('./native.js');
 const report = require('./report.js');
 const parseTrace = require('./trace.js');
 const upload = require('./upload.js');
@@ -62,6 +63,10 @@ util.args =
       type: 'boolean',
       describe: 'start a new browser for each test',
     })
+    .option('native-ep', {
+      type: 'string',
+      describe: 'ep for native',
+    })
     .option('pause-task', {
       type: 'boolean',
       describe: 'pause task',
@@ -90,8 +95,13 @@ util.args =
     .option('tasks', {
       type: 'string',
       describe:
-        'test tasks, split by comma, can be conformance, performance, trace, upload, workload and so on.',
+        'test tasks, split by comma, can be conformance, performance, trace, upload, workload, syncNative, buildNative, runNative and so on.',
       default: 'conformance,performance',
+    })
+    .option('ort-dir', {
+      type: 'string',
+      describe: 'ort dir',
+      default: 'd:/workspace/project/onnxruntime'
     })
     .option('ort-url', {
       type: 'string',
@@ -171,6 +181,9 @@ util.args =
       ],
       [
         'node $0 --tasks trace --timestamp 20231218 --trace-file workload-webgpu-trace',
+      ],
+      [
+        'node $0 --tasks runNative --model-name mobilenetv2-12 --run-times 100 --native-ep dml',
       ],
     ])
     .help()
@@ -301,6 +314,22 @@ async function main() {
     util.ortUrl = 'https://wp-27.sh.intel.com/workspace/project/onnxruntime';
   }
 
+  let warmupTimes;
+  if ('warmup-times' in util.args) {
+    warmupTimes = parseInt(util.args['warmup-times']);
+  } else {
+    warmupTimes = 10;
+  }
+  util.warmupTimes = warmupTimes;
+
+  let runTimes;
+  if ('run-times' in util.args) {
+    runTimes = parseInt(util.args['run-times']);
+  } else {
+    runTimes = 5;
+  }
+  util.runTimes = runTimes;
+
   let tasks = util.args['tasks'].split(',');
 
   if (!fs.existsSync(util.outDir)) {
@@ -374,6 +403,12 @@ async function main() {
         await parseTrace();
       } else if (task === 'workload') {
         workload();
+      } else if (task === 'syncNative') {
+        syncNative();
+      } else if (task === 'buildNative') {
+        buildNative();
+      } else if (task === 'runNative') {
+        runNative();
       }
       util.duration += `${task}: ${(new Date() - startTime) / 1000} `;
     }

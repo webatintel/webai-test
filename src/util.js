@@ -118,9 +118,22 @@ function ssh(cmd) {
   return `ssh ${remoteCmdArgs} ${server} ${cmd}`;
 }
 
+function stdoutOnData(data) {
+  console.log(`${data}`);
+}
+
+function stderrorOnData(data) {
+  console.log(`${data}`);
+}
+
+function onClose(code) {
+  console.log(`process exited with code ${code}`);
+}
+
 module.exports = {
   allEps: allEps,
   conformanceEps: [],
+  cpuCount: os.cpus().length,
   breakdown: false,
   browserArgs: browserArgs,
   hostname: os.hostname(),
@@ -147,6 +160,9 @@ module.exports = {
   log: log,
   scp: scp,
   sleep: sleep,
+  stdoutOnData: stdoutOnData,
+  stderrorOnData: stderrorOnData,
+  onClose: onClose,
   ssh: ssh,
   uncapitalize: uncapitalize,
 };

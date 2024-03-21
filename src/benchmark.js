@@ -267,21 +267,6 @@ async function benchmark(task) {
         url += '&runTimes=1';
       }
     } else if (task === 'performance') {
-      let warmupTimes;
-      if ('warmup-times' in util.args) {
-        warmupTimes = parseInt(util.args['warmup-times']);
-      } else {
-        warmupTimes = 10;
-      }
-      util.warmupTimes = warmupTimes;
-
-      let runTimes;
-      if ('run-times' in util.args) {
-        runTimes = parseInt(util.args['run-times']);
-      } else {
-        runTimes = 5;
-      }
-      util.runTimes = runTimes;
       url += `&warmupTimes=${warmupTimes}&runTimes=${runTimes}`;
     }
 
