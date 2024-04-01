@@ -267,7 +267,7 @@ async function benchmark(task) {
         url += '&runTimes=1';
       }
     } else if (task === 'performance') {
-      url += `&warmupTimes=${warmupTimes}&runTimes=${runTimes}`;
+      url += `&warmupTimes=${util.warmupTimes}&runTimes=${util.runTimes}`;
     }
 
     url += `&wasmThreads=${util['cpuThreads']}`;
