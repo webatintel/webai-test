@@ -292,8 +292,8 @@ async function main() {
     util.browserArgs.push(
       ...['--enable-unsafe-webgpu',
         '--enable-dawn-features=allow_unsafe_apis,use_dxc,record_detailed_timing_in_trace_events,disable_timestamp_query_conversion',
+        '--trace-startup=devtools.timeline,disabled-by-default-gpu.dawn',
         '--trace-startup-format=json',
-        '--enable-tracing=disabled-by-default-gpu.dawn',
       ]);
   }
 
