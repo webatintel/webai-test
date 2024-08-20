@@ -48,6 +48,8 @@ async function asyncFunctionWithTimeout(asyncPromise, timeout) {
   })
 }
 
+const average = array => getFloat(array.reduce((a, b) => a + b) / array.length, 2);
+
 function capitalize(s) {
   return s[0].toUpperCase() + s.slice(1);
 }
@@ -84,6 +86,11 @@ function getDuration(start, end) {
 
 function getFloat(value) {
   return Math.round(parseFloat(value) * 100) / 100;
+}
+
+async function getIframe(page, selector) {
+  const iframeElement = await page.waitForSelector(selector);
+  return await iframeElement.contentFrame();
 }
 
 function getTimestamp(format) {
@@ -131,6 +138,7 @@ function onClose(code) {
 }
 
 module.exports = {
+  average: average,
   allEps: allEps,
   conformanceEps: [],
   cpuCount: os.cpus().length,
@@ -156,6 +164,7 @@ module.exports = {
   ensureNoFile: ensureNoFile,
   getDuration: getDuration,
   getFloat: getFloat,
+  getIframe: getIframe,
   getTimestamp: getTimestamp,
   log: log,
   scp: scp,

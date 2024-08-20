@@ -125,11 +125,10 @@ function removeSlowEps(eps) {
   }
 }
 
-async function benchmark(task) {
+async function runBenchmark(task) {
   // get benchmarks
   let benchmarks = [];
-  let benchmarkJson =
-    path.join(path.resolve(__dirname), util.args['benchmark-json']);
+  let benchmarkJson = path.join(path.resolve(__dirname), util.args['benchmark-json']);
   let taskConfigs = JSON.parse(fs.readFileSync(benchmarkJson));
 
   for (let modelName of taskConfigs) {
@@ -372,4 +371,4 @@ async function benchmark(task) {
   return Promise.resolve(results);
 }
 
-module.exports = benchmark;
+module.exports = runBenchmark;

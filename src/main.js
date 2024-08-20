@@ -7,9 +7,10 @@ const path = require('path');
 const si = require('systeminformation');
 const yargs = require('yargs');
 
+const { runApp } = require('./app.js');
 const benchmark = require('./benchmark.js');
 const config = require('./config.js');
-const {syncNative, buildNative, runNative} = require('./native.js');
+const { syncNative, buildNative, runNative } = require('./native.js');
 const report = require('./report.js');
 const parseTrace = require('./trace.js');
 const upload = require('./upload.js');
@@ -19,9 +20,10 @@ const workload = require('./workload.js');
 util.args =
   yargs.usage('node $0 [args]')
     .strict()
-    .option('model-name', {
+    .option('app-json', {
       type: 'string',
-      describe: 'model name to run, split by comma',
+      describe: 'app json',
+      default: 'app.json',
     })
     .option('benchmark-json', {
       type: 'string',
@@ -63,6 +65,10 @@ util.args =
       type: 'boolean',
       describe: 'start a new browser for each test',
     })
+    .option('model-name', {
+      type: 'string',
+      describe: 'model name to run, split by comma',
+    })
     .option('native-ep', {
       type: 'string',
       describe: 'ep for native',
@@ -95,7 +101,7 @@ util.args =
     .option('tasks', {
       type: 'string',
       describe:
-        'test tasks, split by comma, can be conformance, performance, trace, upload, workload, syncNative, buildNative, runNative and so on.',
+        'test tasks, split by comma, can be conformance, performance, trace, upload, workload, syncNative, buildNative, runNative, app and so on.',
       default: 'conformance,performance',
     })
     .option('ort-dir', {
@@ -184,6 +190,10 @@ util.args =
       ],
       [
         'node $0 --tasks runNative --model-name mobilenetv2-12 --run-times 100 --native-ep dml',
+      ],
+      [
+        'node $0 --tasks app --browser-args="--proxy-server=<proxy>"',
+
       ],
     ])
     .help()
@@ -396,7 +406,7 @@ async function main() {
       if (['conformance', 'performance'].indexOf(task) >= 0) {
         if (!(task === 'performance' && util.warmupTimes === 0 &&
           util.runTimes === 0)) {
-          results[task] = await benchmark(task);
+          results[task] = await runBenchmark(task);
         }
         needReport = true;
       } else if (task === 'trace') {
@@ -409,6 +419,8 @@ async function main() {
         buildNative();
       } else if (task === 'runNative') {
         runNative();
+      } else if (task === 'app') {
+        await runApp();
       }
       util.duration += `${task}: ${(new Date() - startTime) / 1000} `;
     }
