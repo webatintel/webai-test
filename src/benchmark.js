@@ -26,16 +26,6 @@ function cartesianProduct(arr) {
   }, [[]]);
 }
 
-function intersect(a, b) {
-  if (!Array.isArray(a)) {
-    a = [a];
-  }
-  if (!Array.isArray(b)) {
-    b = [b];
-  }
-  return a.filter((v) => b.includes(v));
-}
-
 async function startBrowser(traceFile = undefined) {
   let extraBrowserArgs = [];
   if ('enable-trace' in util.args) {
@@ -135,7 +125,7 @@ async function runBenchmark(task) {
     let config = {};
     if ('model-name' in util.args) {
       config['modelName'] =
-        intersect(modelName, util.args['model-name'].split(','));
+        util.intersect(modelName, util.args['model-name'].split(','));
     } else {
       config['modelName'] = modelName;
     }

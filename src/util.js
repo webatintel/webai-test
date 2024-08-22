@@ -104,6 +104,16 @@ function getTimestamp(format) {
   return timestamp;
 }
 
+function intersect(a, b) {
+  if (!Array.isArray(a)) {
+    a = [a];
+  }
+  if (!Array.isArray(b)) {
+    b = [b];
+  }
+  return a.filter((v) => b.includes(v));
+}
+
 function log(info) {
   console.log(info);
   fs.appendFileSync(this.logFile, String(info) + '\n');
@@ -166,6 +176,7 @@ module.exports = {
   getFloat: getFloat,
   getIframe: getIframe,
   getTimestamp: getTimestamp,
+  intersect: intersect,
   log: log,
   scp: scp,
   sleep: sleep,

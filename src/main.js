@@ -25,6 +25,10 @@ util.args =
       describe: 'app json',
       default: 'app.json',
     })
+    .option('app-name', {
+      type: 'string',
+      describe: 'app name to run, split by comma',
+    })
     .option('benchmark-json', {
       type: 'string',
       describe: 'benchmark json',

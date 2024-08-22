@@ -1,3 +1,5 @@
 [
-  "TjsWebgpuMobilenet"
+  "TjsWebgpuMobilenet",
+  "TvmWebgpuWebllm-phi3",
+  "TvmWebgpuWebllm-llama31"
 ]

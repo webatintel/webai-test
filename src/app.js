@@ -16,11 +16,11 @@ async function runApp() {
     let config = {};
     if ('app-name' in util.args) {
       config['appName'] =
-        intersect(appName, util.args['app-name'].split(','));
+        util.intersect(appName, util.args['app-name'].split(','));
     } else {
       config['appName'] = appName;
     }
-    if (!config['appName']) {
+    if (config['appName'].length === 0) {
       continue;
     }
 
@@ -30,10 +30,11 @@ async function runApp() {
   const results = [];
 
   for (let i = 0; i < apps.length; i++) {
-    const appName = apps[i];
+    const appInfo = apps[i].split('-');
+    const appName = appInfo[0];
     util.log(`[${i + 1}/${apps.length}] ${appName}`);
     const OneApp = require(`./apps/${appName}.js`);
-    const app = new OneApp();
+    const app = new OneApp(appInfo);
     const result = await app.run();
     results.push(result);
   }
@@ -42,8 +43,9 @@ async function runApp() {
 class App {
   metric;
   name;
+  timeout = 30000;
   url;
-  async startBrowser() {
+  async startBrowser(timeout) {
     let extraBrowserArgs = [];
     let browser = await puppeteer.launch({
       args: util['browserArgs'].concat(extraBrowserArgs),
@@ -52,6 +54,7 @@ class App {
       headless: false,
       ignoreHTTPSErrors: true,
       userDataDir: util.userDataDir,
+      protocolTimeout: timeout,
     });
     let page = await browser.newPage();
     return [browser, page];
@@ -79,7 +82,10 @@ class App {
     let browser;
     let page;
 
-    [browser, page] = await this.startBrowser();
+    [browser, page] = await this.startBrowser(this.timeout);
+    if (this.timeout) {
+      page.setDefaultTimeout(this.timeout);
+    }
 
     await page.goto(this.url);
     const result = await this.getResult(page);
