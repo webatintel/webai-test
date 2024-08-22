@@ -39,11 +39,6 @@ class TvmWebgpuWebllm extends App {
       modelElement.click();
     }, this.modelSelector, this.modelSelectorMap, this.modelName);
 
-    // Get the existing count of messages
-    const existingCount = await page.evaluate(() => {
-      return document.querySelectorAll('#app-body > div > div.chat_chat-body__QFv5x > div').length;
-    });
-
     // Feed input
     const input = await page.waitForSelector('#chat-input');
     input.type('Tell me a story in 10 words');
@@ -51,6 +46,13 @@ class TvmWebgpuWebllm extends App {
     await util.sleep(1000);
     // Could not trigger button.click()
     await page.keyboard.press('Enter');
+
+    // Get the existing count of messages
+    await util.sleep(1000);
+    let existingCount = await page.evaluate(() => {
+      return document.querySelectorAll('#app-body > div > div.chat_chat-body__QFv5x > div').length;
+    });
+    console.log(existingCount);
 
     // Get result
     const resultSelector = `#app-body > div > div.chat_chat-body__QFv5x > div:nth-child(${existingCount}) > div > div.chat_chat-message-action-date__RsXTn > div:nth-child(2)`;
