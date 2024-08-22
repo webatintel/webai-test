@@ -52,7 +52,7 @@ class TvmWebgpuWebllm extends App {
     let existingCount = await page.evaluate(() => {
       return document.querySelectorAll('#app-body > div > div.chat_chat-body__QFv5x > div').length;
     });
-    console.log(existingCount);
+    //console.log(existingCount);
 
     // Get result
     const resultSelector = `#app-body > div > div.chat_chat-body__QFv5x > div:nth-child(${existingCount}) > div > div.chat_chat-message-action-date__RsXTn > div:nth-child(2)`;

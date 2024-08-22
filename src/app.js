@@ -32,12 +32,13 @@ async function runApp() {
   for (let i = 0; i < apps.length; i++) {
     const appInfo = apps[i].split('-');
     const appName = appInfo[0];
-    util.log(`[${i + 1}/${apps.length}] ${appName}`);
+    util.log(`[${i + 1}/${apps.length}] ${apps[i]}`);
     const OneApp = require(`./apps/${appName}.js`);
     const app = new OneApp(appInfo);
     const result = await app.run();
-    results.push(result);
+    results.push([appName, result, app.metric]);
   }
+  return results;
 }
 
 class App {

@@ -424,7 +424,8 @@ async function main() {
       } else if (task === 'runNative') {
         runNative();
       } else if (task === 'app') {
-        await runApp();
+        results[task] = await runApp();
+        needReport = true;
       }
       util.duration += `${task}: ${(new Date() - startTime) / 1000} `;
     }

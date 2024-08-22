@@ -6,6 +6,21 @@ const path = require("path");
 const { execSync } = require("child_process");
 const util = require("./util.js");
 
+function getSortedHash(inputHash) {
+  var resultHash = {};
+
+  var keys = Object.keys(inputHash);
+  keys
+    .sort(function (a, b) {
+      return inputHash[a][0] - inputHash[b][0];
+    })
+    .reverse()
+    .forEach(function (k) {
+      resultHash[k] = inputHash[k];
+    });
+  return resultHash;
+}
+
 async function sendMail(to, subject, html) {
   let from = "webgraphics@intel.com";
 
@@ -28,21 +43,6 @@ async function sendMail(to, subject, html) {
     html: html,
   });
   return Promise.resolve();
-}
-
-function getSortedHash(inputHash) {
-  var resultHash = {};
-
-  var keys = Object.keys(inputHash);
-  keys
-    .sort(function (a, b) {
-      return inputHash[a][0] - inputHash[b][0];
-    })
-    .reverse()
-    .forEach(function (k) {
-      resultHash[k] = inputHash[k];
-    });
-  return resultHash;
 }
 
 async function report(results) {
@@ -181,30 +181,19 @@ async function report(results) {
     }
   }
 
-  // unit table
-  let unitTable = "";
-  if ("unit" in results) {
-    let taskResults = results["unit"];
-    unitTable = `<table><tr><th>unit</th><th>webgpu</th>`;
-    for (let epIndex = 1; epIndex < epsLength; epIndex++) {
-      let ep = util.allEps[epIndex];
-      unitTable += `<th>${ep}</th>`;
-    }
-    unitTable += "</tr>";
-
-    unitTable += "<tr><td></td>";
-    for (let epIndex = 0; epIndex < epsLength; epIndex++) {
-      let style;
-      if (taskResults[epIndex] === "NA") {
-        style = neutralStyle;
-      } else if (taskResults[epIndex].includes("FAILED")) {
-        style = badStyle;
-      } else {
-        style = goodStyle;
+  // app table
+  let appTable = "";
+  if ("app" in results) {
+    let taskResults = results["app"];
+    appTable = `<table><tr><th>App</th><th>Perf</th><th>Metric</th></tr>`;
+    for (let i = 0; i < taskResults.length; i++) {
+      appTable += "<tr>";
+      for (let j = 0; j < taskResults[i].length; j++) {
+        appTable += `<td>${taskResults[i][j]}</td>`;
       }
-      unitTable += `<td ${style}>${taskResults[epIndex]}</td>`;
+      appTable += "/<tr>";
     }
-    unitTable += "</tr></table><br>";
+    appTable += "</table><br>";
   }
 
   // config table
@@ -314,7 +303,7 @@ async function report(results) {
 	  th {background-color: #0071c5; color: #ffffff; font-weight: normal;} \
     </style>";
 
-  let html = style + configTable + unitTable + benchmarkTables + breakdownTable;
+  let html = style + configTable + appTable + benchmarkTables + breakdownTable;
 
   const file = path.join(util.timestampDir, `${util.timestamp.substring(0, 8)}.html`);
   fs.writeFileSync(file, html);
@@ -322,7 +311,7 @@ async function report(results) {
 
   if ("email" in util.args) {
     let subject = "[ORT-TEST] " + util["hostname"] + " " + util.timestamp;
-    await sendMail(util.args["email"], subject, html);
+    await util.sendMail(util.args["email"], subject, html);
   }
 }
 
