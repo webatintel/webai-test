@@ -311,7 +311,7 @@ async function report(results) {
 
   if ("email" in util.args) {
     let subject = "[ORT-TEST] " + util["hostname"] + " " + util.timestamp;
-    await util.sendMail(util.args["email"], subject, html);
+    await sendMail(util.args["email"], subject, html);
   }
 }
 
