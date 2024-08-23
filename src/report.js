@@ -1,7 +1,6 @@
 "use strict";
 
 const fs = require("fs");
-const nodemailer = require("nodemailer");
 const path = require("path");
 const { execSync } = require("child_process");
 const util = require("./util.js");
@@ -19,30 +18,6 @@ function getSortedHash(inputHash) {
       resultHash[k] = inputHash[k];
     });
   return resultHash;
-}
-
-async function sendMail(to, subject, html) {
-  let from = "webgraphics@intel.com";
-
-  let transporter = nodemailer.createTransport({
-    host: "ecsmtp.sh.intel.com",
-    port: 25,
-    secure: false,
-    auth: false,
-  });
-
-  transporter.verify((error) => {
-    if (error) util.log("transporter error: ", error);
-    else util.log("Email was sent!");
-  });
-
-  let info = await transporter.sendMail({
-    from: from,
-    to: to,
-    subject: subject,
-    html: html,
-  });
-  return Promise.resolve();
 }
 
 async function report(results) {
@@ -311,7 +286,7 @@ async function report(results) {
 
   if ("email" in util.args) {
     let subject = "[ORT-TEST] " + util["hostname"] + " " + util.timestamp;
-    await sendMail(util.args["email"], subject, html);
+    await util.sendMail(util.args["email"], subject, html);
   }
 }
 

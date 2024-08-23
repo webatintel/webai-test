@@ -2,7 +2,7 @@
 
 const Benchmark = require('./benchmark.js');
 
-class TjsWebgpuMobilenet extends Benchmark {
+class TjsGeminiWebgpu extends Benchmark {
   metric = 'fps'
   name = 'tjs-webgpu-mobilenet';
   url = 'https://huggingface.co/spaces/Xenova/webgpu-mobilenet';

@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const nodemailer = require("nodemailer");
 const os = require('os');
 const path = require('path');
 
@@ -127,6 +128,30 @@ function scp(src, dest) {
   return `scp ${remoteCmdArgs} ${src} ${dest}`;
 }
 
+async function sendMail(to, subject, html) {
+  let from = "webgraphics@intel.com";
+
+  let transporter = nodemailer.createTransport({
+    host: "ecsmtp.pdx.intel.com",
+    port: 25,
+    secure: false,
+    auth: false,
+  });
+
+  transporter.verify((error) => {
+    if (error) console.log("transporter error: ", error);
+    else console.log("Email was sent!");
+  });
+
+  let info = await transporter.sendMail({
+    from: from,
+    to: to,
+    subject: subject,
+    html: html,
+  });
+  return Promise.resolve();
+}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -179,6 +204,7 @@ module.exports = {
   intersect: intersect,
   log: log,
   scp: scp,
+  sendMail: sendMail,
   sleep: sleep,
   stdoutOnData: stdoutOnData,
   stderrorOnData: stderrorOnData,

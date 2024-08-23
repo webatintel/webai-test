@@ -3,7 +3,7 @@
 const { App } = require('../app.js');
 const util = require('../util.js');
 
-class TvmWebgpuWebllm extends App {
+class TvmWebllmWebgpu extends App {
   metric = 'tokens/sec';
   name = 'tvm-webgpu-webllm';
   timeout = 3600000;
