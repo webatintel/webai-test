@@ -12,7 +12,7 @@ class TjsGeminiWebgpu extends Benchmark {
     console.log(1);
     await page.waitForSelector('#status');
     console.log(2);
-    const result = await page.$('#status', (e) => e.textContent);
+    const result = await page.$eval('#status', (e) => e.textContent);
     return result;
   }
 }

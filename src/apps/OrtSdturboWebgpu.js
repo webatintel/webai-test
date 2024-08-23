@@ -11,12 +11,14 @@ class OrtSdturboWebgpu extends App {
 
   async getResult(page) {
     await page.waitForFunction(
-      'document.querySelector("#model-progress").innerText.startsWith("Model download finished")'
+      'document.querySelector("#model-progress").textContent.startsWith("Model download finished")'
     );
     const button = await page.$('#send-button');
     button.click();
-    const status = await page.waitForSelector('#status', (e) => e.textContent);
-    console.log(status);
+    await page.waitForFunction(
+      'document.querySelector("#status").textContent.includes("execution time")'
+    );
+    const status = await page.$eval('#status', (e) => e.textContent);
     const result = status.match('execution time: (.*)ms')[1];
     return result;
   }
