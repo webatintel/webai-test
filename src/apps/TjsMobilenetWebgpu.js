@@ -5,7 +5,7 @@ const util = require('../util.js');
 
 class TjsMobilenetWebgpu extends App {
   metric = 'FPS'
-  name = 'tjs-webgpu-mobilenet';
+  name = 'tjs-mobilenet-webgpu';
   url = 'https://huggingface.co/spaces/Xenova/webgpu-mobilenet';
 
   async getResult(page) {
@@ -27,4 +27,4 @@ class TjsMobilenetWebgpu extends App {
   }
 }
 
-module.exports = TjsWebgpuMobilenet;
+module.exports = TjsMobilenetWebgpu;

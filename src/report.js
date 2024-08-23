@@ -166,7 +166,7 @@ async function report(results) {
       for (let j = 0; j < taskResults[i].length; j++) {
         appTable += `<td>${taskResults[i][j]}</td>`;
       }
-      appTable += "/<tr>";
+      appTable += "</tr>";
     }
     appTable += "</table><br>";
   }

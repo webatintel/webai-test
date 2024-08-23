@@ -5,7 +5,7 @@ const util = require('../util.js');
 
 class TvmWebllmWebgpu extends App {
   metric = 'tokens/sec';
-  name = 'tvm-webgpu-webllm';
+  name = 'tvm-webllm-webgpu';
   timeout = 3600000;
   url = 'https://chat.webllm.ai/';
 
@@ -63,4 +63,4 @@ class TvmWebllmWebgpu extends App {
   }
 }
 
-module.exports = TvmWebgpuWebllm;
+module.exports = TvmWebllmWebgpu;

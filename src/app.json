@@ -1,5 +1,6 @@
 [
   "TjsMobilenetWebgpu",
   "TvmWebllmWebgpu-phi3",
-  "TvmWebllmWebgpu-llama31"
+  "TvmWebllmWebgpu-llama31",
+  "OrtSdturboWebgpu"
 ]
