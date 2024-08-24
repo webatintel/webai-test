@@ -1,6 +1,15 @@
 [
-  "TjsMobilenetWebgpu",
-  "TvmWebllmWebgpu-phi3",
-  "TvmWebllmWebgpu-llama31",
+  "TvmWebllmWebgpu-llama3.1_8b",
+  "TvmWebllmWebgpu-phi3.5_mini",
+  "TvmWebllmWebgpu-smollm_1.7b",
+  "TvmWebllmWebgpu-smollm_360m",
+  "TvmWebllmWebgpu-qwen2_0.5b",
+  "TvmWebllmWebgpu-qwen2_7b",
+  "TvmWebllmWebgpu-qwen2_math_1.5b",
+  "TvmWebllmWebgpu-qwen2_math_7b",
+  "TvmWebllmWebgpu-gemma2_2b",
+  "TvmWebllmWebgpu-gemma2_9b",
+  "TvmWebllmWebgpu-llama3_8b",
+  "TvmWebllmWebgpu-phi3_mini",
   "OrtSdturboWebgpu"
 ]

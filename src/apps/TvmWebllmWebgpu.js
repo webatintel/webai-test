@@ -4,16 +4,26 @@ const { App } = require('../app.js');
 const util = require('../util.js');
 
 class TvmWebllmWebgpu extends App {
-  metric = 'tokens/sec';
+  metric = 'TPS';
   name = 'tvm-webllm-webgpu';
   timeout = 3600000;
   url = 'https://chat.webllm.ai/';
 
   modelSelectSelector = '#app-body > div > div.chat_chat-input-panel__rO72m > div.chat_chat-input-actions__mwYC_ > div.chat_chat-input-action__DMW7Y.clickable.chat_full-width__RdaYc';
-  modelSelector = '#app-body > div > div.chat_chat-input-panel__rO72m > div.chat_chat-input-actions__mwYC_ > div.ui-lib_selector__tdy57 > div > div > div:nth-child(1)';
-  modelSelectorMap = {
-    'llama31': 2,
-    'phi3': 10,
+  modelSelector = '#app-body > div > div.chat_chat-input-panel__rO72m > div.chat_chat-input-actions__mwYC_ > div.ui-lib_selector__tdy57 > div > div';
+  modelInfo = {
+    'llama3.1_8b': 'Llama-3.1-8B-Instruct-q4f16_1-MLC-1k',
+    'phi3.5_mini': 'Phi-3.5-mini-instruct-q4f16_1-MLC-1k',
+    'smollm_1.7b': 'SmolLM-1.7B-Instruct-q4f16_1-MLC',
+    'smollm_360m': 'SmolLM-360M-Instruct-q4f16_1-MLC',
+    'qwen2_0.5b': 'Qwen2-0.5B-Instruct-q4f16_1-MLC',
+    'qwen2_7b': 'Qwen2-7B-Instruct-q4f16_1-MLC',
+    'qwen2_math_1.5b': 'Qwen2-Math-1.5B-Instruct-q4f16_1-MLC',
+    'qwen2_math_7b': 'Qwen2-Math-7B-Instruct-q4f16_1-MLC',
+    'gemma2_2b': 'gemma-2-2b-it-q4f16_1-MLC-1k',
+    'gemma2_9b': 'gemma-2-9b-it-q4f16_1-MLC',
+    'llama3_8b': 'Llama-3-8B-Instruct-q4f16_1-MLC-1k',
+    'phi3_mini': 'Phi-3-mini-4k-instruct-q4f16_1-MLC-1k',
   };
 
   constructor(appInfo) {
@@ -33,11 +43,18 @@ class TvmWebllmWebgpu extends App {
 
     // Choose the model
     await page.waitForSelector(this.modelSelector);
-    page.evaluate((selector, modelSelectorMap, modelName) => {
-      const modelSelector = selector.replace('nth-child(1)', `nth-child(${modelSelectorMap[modelName]})`);
-      const modelElement = document.querySelector(modelSelector);
-      modelElement.click();
-    }, this.modelSelector, this.modelSelectorMap, this.modelName);
+    await util.sleep(1000);
+    page.evaluate((selector, modelInfo, modelName) => {
+      const count = document.querySelector(selector).children.length;
+      for (let i = 1; i <= count; i++) {
+        const childSelector = `${selector} >div:nth-child(${i})`;
+        const childNameSelector = `${childSelector} > div > div > div`;
+        if (modelInfo[modelName] === document.querySelector(childNameSelector).textContent) {
+          document.querySelector(childSelector).click();
+          break;
+        }
+      }
+    }, this.modelSelector, this.modelInfo, this.modelName);
 
     // Feed input
     const input = await page.waitForSelector('#chat-input');
