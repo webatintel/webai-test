@@ -10,6 +10,5 @@
   "TvmWebllmWebgpu-gemma2_2b",
   "TvmWebllmWebgpu-gemma2_9b",
   "TvmWebllmWebgpu-llama3_8b",
-  "TvmWebllmWebgpu-phi3_mini",
-  "OrtSdturboWebgpu"
+  "TvmWebllmWebgpu-phi3_mini"
 ]

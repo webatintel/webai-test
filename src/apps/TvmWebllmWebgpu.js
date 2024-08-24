@@ -9,6 +9,7 @@ class TvmWebllmWebgpu extends App {
   timeout = 3600000;
   url = 'https://chat.webllm.ai/';
 
+  chatSelector = 'body > div.home_container__4PEJZ.home_container__4PEJZ > div.home_sidebar__fPZfq.false > div.home_sidebar-body__9zbei > div > div > div.home_chat-item-delete__3qV5m'
   modelSelectSelector = '#app-body > div > div.chat_chat-input-panel__rO72m > div.chat_chat-input-actions__mwYC_ > div.chat_chat-input-action__DMW7Y.clickable.chat_full-width__RdaYc';
   modelSelector = '#app-body > div > div.chat_chat-input-panel__rO72m > div.chat_chat-input-actions__mwYC_ > div.ui-lib_selector__tdy57 > div > div';
   modelInfo = {
@@ -32,6 +33,10 @@ class TvmWebllmWebgpu extends App {
   }
 
   async getResult(page) {
+    // Clean up existing chat
+    const chatElement = await page.waitForSelector(this.chatSelector);
+    chatElement.click();
+
     // Popup the model selector
     await page.waitForSelector(this.modelSelectSelector);
     await util.sleep(1000);

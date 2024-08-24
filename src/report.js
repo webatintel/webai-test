@@ -182,7 +182,7 @@ async function report(results) {
   for (let category of [
     "browserArgs",
     "browserPath",
-    "chromeVersion",
+    "browserVersion",
     "cpuName",
     "cpuThreads",
     "crossOriginIsolated",

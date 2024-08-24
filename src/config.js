@@ -83,12 +83,21 @@ async function getConfig() {
   }
 
   // Chrome
-  if (util["platform"] === "win32" && util.args["browser"].match("chrome_")) {
+  if (util["platform"] === "win32" && util.args["browser"].match("chrome")) {
     const info = execSync(
-      `reg query "HKEY_CURRENT_USER\\Software\\Google\\` + util["chromePath"] + `\\BLBeacon" /v version`
+      `reg query "HKEY_CURRENT_USER\\Software\\Google\\${util['browserName']}\\BLBeacon" /v version`
     ).toString();
     const match = info.match("REG_SZ (.*)");
-    util["chromeVersion"] = match[1];
+    util["browserVersion"] = match[1];
+  }
+
+  // Edge
+  if (util["platform"] === "win32" && util.args["browser"].match("edge")) {
+    const info = execSync(
+      `reg query "HKEY_CURRENT_USER\\Software\\Microsoft\\${util['browserName']}\\BLBeacon" /v version`
+    ).toString();
+    const match = info.match("REG_SZ (.*)");
+    util["browserVersion"] = match[1];
   }
 
   if (util["platform"] !== "win32" && util["platform"] !== "darwin" && util["platform"] !== "linux") {
@@ -123,7 +132,7 @@ async function getExtraConfig() {
     chromeName = "Chrome";
   }
   const versionElement = await page.$("#version");
-  util["chromeVersion"] = await versionElement.evaluate((element) => element.innerText);
+  util["browserVersion"] = await versionElement.evaluate((element) => element.innerText);
 
   // gpuDriverVersion and
   await page.goto("chrome://gpu");

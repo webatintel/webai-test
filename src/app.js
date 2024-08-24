@@ -36,7 +36,7 @@ async function runApp() {
     const OneApp = require(`./apps/${appName}.js`);
     const app = new OneApp(appInfo);
     const result = await app.run();
-    results.push([appName, result, app.metric]);
+    results.push([apps[i], result, app.metric]);
   }
   return results;
 }
@@ -67,7 +67,7 @@ class App {
 
     try {
       util.asyncFunctionWithTimeout(await browser.close(), 10);
-      console.log('Close the browser with browser.close');
+      //console.log('Close the browser with browser.close');
     } catch (error) {
       console.log('Close the browser with process.kill');
       const pid = browser.process().pid;

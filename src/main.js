@@ -210,10 +210,11 @@ async function main() {
   }
 
   // set util members
+  let browserName;
   let browserPath;
   let userDataDir;
   if (util.args['browser'] === 'chrome_canary') {
-    util['chromePath'] = 'Chrome SxS';
+    browserName = 'Chrome SxS';
     if (util.platform === 'darwin') {
       browserPath =
         '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary';
@@ -227,10 +228,10 @@ async function main() {
     } else if (util.platform === 'win32') {
       browserPath = `${process.env.LOCALAPPDATA}/Google/Chrome SxS/Application/chrome.exe`;
       userDataDir =
-        `${process.env.LOCALAPPDATA}/Google/${util['chromePath']}/User Data`;
+        `${process.env.LOCALAPPDATA}/Google/${browserName}/User Data`;
     }
   } else if (util.args['browser'] === 'chrome_dev') {
-    util['chromePath'] = 'Chrome Dev';
+    browserName = 'Chrome Dev';
     if (util.platform === 'darwin') {
       browserPath =
         '/Applications/Google Chrome Dev.app/Contents/MacOS/Google Chrome Dev';
@@ -243,14 +244,14 @@ async function main() {
     } else if (util.platform === 'win32') {
       browserPath = `${process.env.PROGRAMFILES}/Google/Chrome Dev/Application/chrome.exe`;
       userDataDir =
-        `${process.env.LOCALAPPDATA}/Google/${util['chromePath']}/User Data`;
+        `${process.env.LOCALAPPDATA}/Google/${browserName}/User Data`;
     }
   } else if (util.args['browser'] === 'chrome_beta') {
-    util['chromePath'] = 'Chrome Beta';
+    browserName = 'Chrome Beta';
     if (util.platform === 'darwin') {
       browserPath =
         '/Applications/Google Chrome Beta.app/Contents/MacOS/Google Chrome Beta';
-      userDataDir = `/Users/${os.userInfo()
+      userDNameir = `/Users/${os.userInfo()
         .username}/Library/Application Support/Google/Chrome Beta`;
     } else if (util.platform === 'linux') {
       browserPath = '/usr/bin/google-chrome-beta';
@@ -259,10 +260,10 @@ async function main() {
     } else if (util.platform === 'win32') {
       browserPath = `${process.env.PROGRAMFILES}/Google/Chrome Beta/Application/chrome.exe`;
       userDataDir =
-        `${process.env.LOCALAPPDATA}/Google/${util['chromePath']}/User Data`;
+        `${process.env.LOCALAPPDATA}/Google/${browserName}/User Data`;
     }
   } else if (util.args['browser'] === 'chrome_stable') {
-    util['chromePath'] = 'Chrome';
+    browserName = 'Chrome';
     if (util.platform === 'darwin') {
       browserPath =
         '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -275,14 +276,36 @@ async function main() {
       browserPath =
         `${process.env.PROGRAMFILES}/Google/Chrome/Application/chrome.exe`;
       userDataDir =
-        `${process.env.LOCALAPPDATA}/Google/${util['chromePath']}/User Data`;
+        `${process.env.LOCALAPPDATA}/Google/${browserName}/User Data`;
     }
-  } else {
+  } else if (util.args['browser'] === 'edge_canary') {
+    browserName = 'Edge SXS';
+    if (util.platform === 'win32') {
+      browserPath =
+        `${process.env.LOCALAPPDATA}/Microsoft/Edge SXS/Application/msedge.exe`;
+      userDataDir =
+        `${process.env.LOCALAPPDATA}/Microsoft/${browserName}/User Data`;
+    }
+  } else if (util.args['browser'] === 'edge_stable') {
+    browserName = 'Edge';
+    if (util.platform === 'win32') {
+      browserPath =
+        `${process.env["PROGRAMFILES(X86)"]}/Microsoft/Edge/Application/msedge.exe`;
+      userDataDir =
+        `${process.env.LOCALAPPDATA}/Microsoft/${browserName}/User Data`;
+    }
+  }
+  else {
+    browserName = util.args['browser'];
     browserPath = util.args['browser'];
     userDataDir = `${util.outDir}/user-data-dir`;
   }
 
+
+  util.browserName = browserName;
+  // TODO: handle space in edge_stable's path
   util.browserPath = browserPath;
+  //console.log(util.browserPath);
   util.userDataDir = userDataDir;
   if ('cleanup-user-data-dir' in util.args) {
     console.log('Cleanup user data dir');
