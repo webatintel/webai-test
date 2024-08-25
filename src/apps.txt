@@ -10,5 +10,6 @@
   "TvmWebllmWebgpu-gemma2_9b",
   "TvmWebllmWebgpu-llama3_8b",
   "TvmWebllmWebgpu-phi3_mini",
-  "OrtSdturboWebgpu", // OOM due to latest dev
+  "OrtSdturboWebgpu", // OOM
   "TjsMobilenetWebgpu",
+  "TjsPhiWebgpu", // OOM

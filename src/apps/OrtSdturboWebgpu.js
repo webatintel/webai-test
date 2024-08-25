@@ -18,7 +18,7 @@ class OrtSdturboWebgpu extends App {
     await page.waitForFunction(
       'document.querySelector("#status").textContent.includes("execution time")'
     );
-    const status = await page.$eval('#status', (e) => e.textContent);
+    const status = await page.$eval('#status', (el) => el.textContent);
     const result = status.match('execution time: (.*)ms')[1];
     return result;
   }

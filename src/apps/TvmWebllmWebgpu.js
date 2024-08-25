@@ -63,7 +63,7 @@ class TvmWebllmWebgpu extends App {
 
     // Feed input
     const input = await page.waitForSelector('#chat-input');
-    input.type('Tell me a story in 10 words');
+    input.type(this.defaultLlmInput);
     // Sleep a while so that Enter takes effect
     await util.sleep(1000);
     // Could not trigger button.click()
@@ -78,8 +78,8 @@ class TvmWebllmWebgpu extends App {
 
     // Get result
     const resultSelector = `#app-body > div > div.chat_chat-body__QFv5x > div:nth-child(${existingCount}) > div > div.chat_chat-message-action-date__RsXTn > div:nth-child(2)`;
-    const resultElement = await page.waitForSelector(resultSelector, { timeout: this.timeout });
-    let result = await page.$eval(resultSelector, (e) => e.textContent);
+    await page.waitForSelector(resultSelector, { timeout: this.timeout });
+    let result = await page.$eval(resultSelector, (el) => el.textContent);
     result = result.match('Decode: (\\d+\\.\\d+) tok/s,')[1];
     return result;
   }

@@ -1,3 +1,4 @@
+// TODO
 'use strict';
 
 const { App } = require('../app.js');
@@ -6,29 +7,25 @@ const util = require('../util.js');
 class TjsPhiWebgpu extends App {
   metric = 'TPS'
   name = 'tjs-phi3.5-webgpu';
-  url = 'https://huggingface.co/spaces/webml-community/phi-3.5-webgpu';
+  url = 'https://webatintel.github.io/webai-demos/tjs-phi35-webgpu/';
 
   async getResult(page) {
-    const iframe = await util.getIframe(page, 'iframe');
-    await iframe.waitForSelector('#status');
-    const buttonElement = await iframe.waitForSelector('#root > div > div.h-full.overflow-auto.scrollbar-thin.flex.justify-center.items-center.flex-col.relative > div.flex.flex-col.items-center.px-4 > button')
+    const buttonElement = await page.waitForSelector('button');
     buttonElement.click();
 
+    await page.waitForSelector(".text-xl");
+    console.log('ready')
+    const textareaElement = page.waitForSelector('textarea');
+    console.log(textareaElement.textContent)
+    textareaElement.textContent = this.defaultLlmInput;
 
-    let status = await iframe.$eval('#status', (e) => e.textContent);
-    while (!status.startsWith('FPS')) {
-      await util.sleep(1000);
-      status = await iframe.$eval('#status', (e) => e.textContent);
-    }
+    console.log(2)
+    const sendButtonElement = await page.waitForSelector('div > div > div');
+    sendButtonElement.click();
 
-    const results = [];
-    for (let i = 0; i < 3; i++) {
-      const status = await iframe.$eval('#status', (e) => e.textContent);
-      results.push(parseFloat(status.replace('FPS: ', '')));
-      await util.sleep(1000);
-    }
-    return util.average(results);
+    const result = await page.$eval('#root > div > div.overflow-y-auto.scrollbar-thin.w-full.flex.flex-col.items-center.h-full > p > span.font-medium.text-center.mr-1.text-black.dark\:text-white', (el) => el.textContent);
+    return result;
   }
 }
 
-module.exports = TjsMobilenetWebgpu;
+module.exports = TjsPhiWebgpu;

@@ -42,9 +42,10 @@ async function runApp() {
 }
 
 class App {
+  defaultLlmInput = 'Tell me a story in 10 words';
   metric;
   name;
-  timeout = 30000;
+  timeout = 3600000;
   url;
   async startBrowser(timeout) {
     let extraBrowserArgs = [];
