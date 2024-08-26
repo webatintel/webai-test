@@ -6,6 +6,7 @@ const util = require('../util.js');
 class TjsPhiWebgpu extends App {
   metric = 'TPS'
   name = 'tjs-phi3.5-webgpu';
+  // 'https://huggingface.co/spaces/webml-community/phi-3.5-webgpu'
   url = 'https://webatintel.github.io/webai-demos/tjs-phi35-webgpu/';
 
   async getResult(page) {
