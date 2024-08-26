@@ -9,22 +9,12 @@ const util = require('./util.js');
 
 async function runApp() {
   let apps = [];
-  let appJson = path.join(path.resolve(__dirname), util.args['app-json']);
-  let taskConfigs = JSON.parse(fs.readFileSync(appJson));
 
-  for (let appName of taskConfigs) {
-    let config = {};
-    if ('app-name' in util.args) {
-      config['appName'] =
-        util.intersect(appName, util.args['app-name'].split(','));
-    } else {
-      config['appName'] = appName;
-    }
-    if (config['appName'].length === 0) {
-      continue;
-    }
-
-    apps.push(appName);
+  if ('app-name' in util.args) {
+    apps = util.args['app-name'].split(',');
+  } else {
+    let appJson = path.join(path.resolve(__dirname), util.args['app-json']);
+    apps = JSON.parse(fs.readFileSync(appJson));
   }
 
   const results = [];
