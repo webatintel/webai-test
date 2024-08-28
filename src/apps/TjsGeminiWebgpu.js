@@ -2,7 +2,7 @@
 
 const Benchmark = require('./benchmark.js');
 
-class TjsGeminiWebgpu extends Benchmark {
+class TjsGeminiWebgpu extends App {
   metric = 'fps'
   name = 'tjs-gemini-webgpu';
   timeout = 1200000;

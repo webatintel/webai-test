@@ -14,3 +14,4 @@
   "TjsPhiWebgpu",
   // TODO
   "OrtSdturboWebgpu", // OOM
+  "JsGeminiWebgpu", // Could not load components
