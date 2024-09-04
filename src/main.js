@@ -61,21 +61,38 @@ util.args =
       type: 'string',
       describe: 'email to',
     })
-    .option('kill-chrome', {
-      type: 'boolean',
-      describe: 'kill chrome before testing',
-    })
     .option('disable-new-browser', {
       type: 'boolean',
       describe: 'start a new browser for each test',
+    })
+    .option('enable-trace', {
+      type: 'boolean',
+      describe: 'enable trace',
+    })
+    .option('kill-chrome', {
+      type: 'boolean',
+      describe: 'kill chrome before testing',
     })
     .option('model-name', {
       type: 'string',
       describe: 'model name to run, split by comma',
     })
+    .option('model-url', {
+      type: 'string',
+      describe: 'model url',
+    })
     .option('native-ep', {
       type: 'string',
       describe: 'ep for native',
+    })
+    .option('ort-dir', {
+      type: 'string',
+      describe: 'ort dir',
+      default: 'd:/workspace/project/onnxruntime'
+    })
+    .option('ort-url', {
+      type: 'string',
+      describe: 'ort url',
     })
     .option('pause-task', {
       type: 'boolean',
@@ -108,15 +125,6 @@ util.args =
         'test tasks, split by comma, can be conformance, performance, trace, upload, workload, syncNative, buildNative, runNative, app and so on.',
       default: 'conformance,performance',
     })
-    .option('ort-dir', {
-      type: 'string',
-      describe: 'ort dir',
-      default: 'd:/workspace/project/onnxruntime'
-    })
-    .option('ort-url', {
-      type: 'string',
-      describe: 'ort url',
-    })
     .option('timestamp', {
       type: 'string',
       describe: 'timestamp',
@@ -138,10 +146,6 @@ util.args =
       type: 'string',
       describe: 'trace file',
     })
-    .option('enable-trace', {
-      type: 'boolean',
-      describe: 'enable trace',
-    })
     .option('upload', {
       type: 'boolean',
       describe: 'upload result to server',
@@ -150,14 +154,14 @@ util.args =
       type: 'number',
       describe: 'warmup times',
     })
-    .option('workload-url', {
-      type: 'string',
-      describe: 'workload url',
-    })
     .option('workload-timeout', {
       type: 'number',
       describe: 'workload timeout in seconds',
       default: 5,
+    })
+    .option('workload-url', {
+      type: 'string',
+      describe: 'workload url',
     })
     .example([
       ['node $0 --email a@intel.com;b@intel.com // Send report to emails'],
@@ -334,6 +338,18 @@ async function main() {
       ]);
   }
 
+  if ('model-url' in util.args) {
+    util.modelUrl = util.args['model-url'];
+  } else {
+    util.modelUrl = 'wp-27';
+  }
+
+  if ('ort-url' in util.args) {
+    util.ortUrl = util.args['ort-url'];
+  } else {
+    util.ortUrl = 'https://wp-27.sh.intel.com/workspace/project/onnxruntime';
+  }
+
   if ('toolkit-url' in util.args) {
     util.toolkitUrl = util.args['toolkit-url'];
   } else {
@@ -343,12 +359,6 @@ async function main() {
 
   if ('toolkit-url-args' in util.args) {
     util.toolkitUrlArgs.push(...util.args['toolkit-url-args'].split('&'));
-  }
-
-  if ('ort-url' in util.args) {
-    util.ortUrl = util.args['ort-url'];
-  } else {
-    util.ortUrl = 'https://wp-27.sh.intel.com/workspace/project/onnxruntime';
   }
 
   let warmupTimes;

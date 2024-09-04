@@ -31,7 +31,7 @@ async function startBrowser(traceFile = undefined) {
   if ('enable-trace' in util.args) {
     extraBrowserArgs.push(`--trace-startup-file=${traceFile}`);
   }
-
+  console.log(util['browserArgs'])
   let browser = await puppeteer.launch({
     args: util['browserArgs'].concat(extraBrowserArgs),
     defaultViewport: null,
@@ -244,7 +244,7 @@ async function runBenchmark(task) {
     if (util.toolkitUrlArgs.length > 0) {
       url += `&${util.toolkitUrlArgs.join('&')}`;
     }
-    url += `&ortUrl=${util.ortUrl}`;
+    url += `&modelUrl=${util.modelUrl}&ortUrl=${util.ortUrl}`;
 
     // update model
     if ([''].indexOf(modelName) >= 0) {
