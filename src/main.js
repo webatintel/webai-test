@@ -8,7 +8,7 @@ const si = require('systeminformation');
 const yargs = require('yargs');
 
 const { runApp } = require('./app.js');
-const benchmark = require('./benchmark.js');
+const runBenchmark = require('./benchmark.js');
 const config = require('./config.js');
 const { syncNative, buildNative, runNative } = require('./native.js');
 const report = require('./report.js');
