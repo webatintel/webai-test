@@ -12,7 +12,7 @@ browserArgs.push(
 // webnn
 browserArgs.push(
   ...['--enable-features=WebMachineLearningNeuralNetwork',
-    '--disable-gpu-sandbox']);
+    '--disable-gpu-sandbox', '--use-redist-dml']);
 
 let parameters = ['modelName', 'ep'];
 
