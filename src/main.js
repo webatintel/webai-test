@@ -231,8 +231,11 @@ async function main() {
         `/home/${os.userInfo().username}/.config/google-chrome-unstable`;
     } else if (util.platform === 'win32') {
       browserPath = `${process.env.LOCALAPPDATA}/Google/Chrome SxS/Application/chrome.exe`;
+      // DevTools remote debugging requires a non-default data directory since Chrome 136.
+      // See https://developer.chrome.com/blog/remote-debugging-port
       userDataDir =
-        `${process.env.LOCALAPPDATA}/Google/${browserName}/User Data`;
+        `${process.env.LOCALAPPDATA}/Google/${browserName}/User Data For DevTools`;
+      util.ensureDir(userDataDir);
     }
   } else if (util.args['browser'] === 'chrome_dev') {
     browserName = 'Chrome Dev';
@@ -247,8 +250,11 @@ async function main() {
         `/home/${os.userInfo().username}/.config/google-chrome-unstable`;
     } else if (util.platform === 'win32') {
       browserPath = `${process.env.PROGRAMFILES}/Google/Chrome Dev/Application/chrome.exe`;
+      // DevTools remote debugging requires a non-default data directory since Chrome 136.
+      // See https://developer.chrome.com/blog/remote-debugging-port
       userDataDir =
-        `${process.env.LOCALAPPDATA}/Google/${browserName}/User Data`;
+        `${process.env.LOCALAPPDATA}/Google/${browserName}/User Data For DevTools`;
+      util.ensureDir(userDataDir);
     }
   } else if (util.args['browser'] === 'chrome_beta') {
     browserName = 'Chrome Beta';
@@ -263,8 +269,11 @@ async function main() {
         `/home/${os.userInfo().username}/.config/google-chrome-beta`;
     } else if (util.platform === 'win32') {
       browserPath = `${process.env.PROGRAMFILES}/Google/Chrome Beta/Application/chrome.exe`;
+      // DevTools remote debugging requires a non-default data directory since Chrome 136.
+      // See https://developer.chrome.com/blog/remote-debugging-port
       userDataDir =
-        `${process.env.LOCALAPPDATA}/Google/${browserName}/User Data`;
+        `${process.env.LOCALAPPDATA}/Google/${browserName}/User Data For DevTools`;
+      util.ensureDir(userDataDir);
     }
   } else if (util.args['browser'] === 'chrome_stable') {
     browserName = 'Chrome';
@@ -279,8 +288,11 @@ async function main() {
     } else if (util.platform === 'win32') {
       browserPath =
         `${process.env.PROGRAMFILES}/Google/Chrome/Application/chrome.exe`;
+      // DevTools remote debugging requires a non-default data directory since Chrome 136.
+      // See https://developer.chrome.com/blog/remote-debugging-port
       userDataDir =
-        `${process.env.LOCALAPPDATA}/Google/${browserName}/User Data`;
+        `${process.env.LOCALAPPDATA}/Google/${browserName}/User Data For DevTools`;
+      util.ensureDir(userDataDir);
     }
   } else if (util.args['browser'] === 'edge_canary') {
     browserName = 'Edge SXS';
